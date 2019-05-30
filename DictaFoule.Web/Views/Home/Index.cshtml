@@ -1,0 +1,38 @@
+﻿@model List<DictaFoule.Web.Models.Project.LogModel>
+    @{
+        ViewBag.Title = "Index";
+        Layout = "~/Views/Shared/_Admin.cshtml";
+    }
+
+    <div class="row">
+        <div class="col-lg-12">
+            <h1 class="page-header">Tableau de bord</h1>
+        </div>
+    </div>
+<table class="table table-striped">
+    <tr>
+        <th>Id</th>
+        <th>Etat</th>
+        <th>WebJob</th>
+        <th>Id Projet</th>
+        <th>Message</th>
+        <th>Date de création</th>
+        <th></th>
+    </tr>
+    @foreach (var Project in Model)
+    {
+
+        <tr>
+            <td>@Project.IdLog</td>
+            @if ((int)Project.LogLevel == 1)
+            {<td><span class="label-info">@Project.LogLevel</span></td>}
+            @if ((int)Project.LogLevel >= 3)
+            {<td><span class="label-danger">@Project.LogLevel</span></td> }
+            <td>@Project.Type</td>
+            <td>@Project.Id_projet</td>
+            <td>@Project.Message</td>
+            <td>@Project.CreationDate</td>
+        </tr>
+
+    }
+</table>

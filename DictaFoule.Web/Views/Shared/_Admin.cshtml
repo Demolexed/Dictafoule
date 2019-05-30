@@ -1,0 +1,53 @@
+﻿<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>@ViewBag.Title</title>
+    <link href="~/Content/bootstrap.min.css" rel="stylesheet" type="text/css" />
+    <link href="~/Content/font-awesome.min.css" rel="stylesheet" />
+    <link href="~/Content/jasny-bootstrap.css" rel="stylesheet" />
+    <link href="~/Content/Site.css" rel="stylesheet" type="text/css" />
+    <script src="~/Scripts/modernizr-2.6.2.js"></script>
+</head>
+<body>
+    <div id="wrapper">
+        <div class="navbar navbar-default navbar-fixed-top">
+            <div class="container">
+                <div class="navbar-header">
+                    <div class="navbar-brand">DictaFoule</div>
+                </div>
+                <ul class="nav navbar-nav">
+                    <li><a href="@Url.Action("Index", "Home")"><i class="fa fa-tachometer fa-fw"></i> Tableau de bord</a></li>
+                    <li><a href="@Url.Action("Create", "Project")"><i class="fa fa-plus fa-fw"></i> Nouveau projet</a></li>
+                    <li><a href="@Url.Action("Index", "Project")"><i class="fa fa-list fa-fw"></i> List des projets</a></li>
+                </ul>
+                <ul class="nav navbar-nav navbar-right">
+                    <li class="dropdown">
+                        <a class="dropdown-toggle" data-toggle="dropdown" href="#">
+                            <i class="fa fa-user fa-fw"></i> <i class="fa fa-caret-down"></i>
+                        </a>
+                        <ul class="dropdown-menu">
+                            <li><a href="@Url.Action("Logout", "Authentication")"><i class="fa fa-sign-out fa-fw"></i> Se déconnecter</a></li>
+                        </ul>
+                    </li>
+                </ul>
+            </div>
+        </div>
+
+        <div class="container body-content">
+
+            @RenderBody()
+
+        </div>
+
+    </div>
+
+    <script src="~/Scripts/jquery-1.10.2.min.js"></script>
+    <script src="~/Scripts/bootstrap.min.js"></script>
+    <script src="~/scripts/jasny-bootstrap.js"></script>
+
+    @RenderSection("scripts", required: false)
+
+</body>
+</html>

@@ -1,0 +1,14 @@
+﻿{
+  "$schema": "http://schemastore.org/schemas/json/webjobs-list.json",
+  "WebJobs": [
+    {
+      "filePath": "../WebJob/SoundCut.WebJob/SoundCut.WebJob.csproj"
+    },
+    {
+      "filePath": "../WebJob/SpeechToText.WebJob/SpeechToText.WebJob.csproj"
+    },
+    {
+      "filePath": "../TextToTask/TextToTask.WebJob.csproj"
+    }
+  ]
+}
