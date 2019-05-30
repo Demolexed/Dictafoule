@@ -1,0 +1,38 @@
+﻿@model List<DictaFoule.Web.Models.Project.ListModel>
+@{
+    ViewBag.Title = "Liste des projets";
+    Layout = "~/Views/Shared/_Admin.cshtml";
+}
+
+<div class="row">
+    <div class="col-lg-12">
+        <h1 class="page-header">Liste des projets</h1>
+    </div>
+</div>
+
+<div class="space-top-15"></div>
+
+<table class="table table-striped">
+    <tr>
+        <th>#</th>
+        <th>Etat</th>
+        <th>Date de création</th>
+        <th>Fichier import</th>
+        <th>Download</th>
+    </tr>
+    @foreach (var Project in Model)
+    {
+        <tr>
+            <td>@Project.IdProject</td>
+            <td>@Project.State</td>
+            <td>@Project.CreationDate</td>
+            <td><a href="@Project.ImportUri" target="_blank">@Project.FileName</a></td>
+            <td>
+                @if (Project.State == DictaFoule.Common.Enum.ProjectState.ProjectCompleted)
+                {
+                    <a href="@Url.Action("Download","Project", new { id = Project.IdProject})"><span class="icon-action glyphicon glyphicon-log-out" data-toggle="tooltip" data-placement="top" title="Download"></span></a>
+                }
+            </td>
+    </tr>
+    }
+</table>

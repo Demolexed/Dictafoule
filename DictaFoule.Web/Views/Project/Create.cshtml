@@ -1,0 +1,85 @@
+﻿@{
+    ViewBag.Title = "Nouveau projet";
+    Layout = "~/Views/Shared/_Admin.cshtml";
+}
+<link href="~/Content/jasny-bootstrap.css" rel="stylesheet" />
+
+<div class="row">
+    <div class="col-lg-12">
+        <h1 class="page-header">Nouveau projet</h1>
+    </div>
+</div>
+
+<div class="space-top-15"></div>
+
+<div class="row">
+    <div id="MessageSuccess" class="col-lg-12">
+        <p class="text-success"><i class="fa fa-check"></i> Votre fichier a été téléchargé avec succès</p>
+    </div>
+</div>
+
+<div class="row">
+    <div id="MessageDanger" class="col-lg-12">
+        <p class="text-danger"><i class='fa fa-close'></i> </p>
+    </div>
+</div>
+
+<div class="row">
+    <div id="MessageInfo" class="col-lg-12">
+        <p class="text-info"><i class="fa fa-refresh fa-spin fa-fw"></i> Votre fichier est cours de téléchargement</p>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-md-12">
+        <div class="fileinput fileinput-new" data-provides="fileinput">
+            <span class="btn btn-default btn-file"><i class="fa fa-folder-open-o"></i> <span>Selectionner un fichier MP3 a importer</span><input id="ImportFile" type="file" /></span>
+            <span class="fileinput-filename"></span> <span class="fileinput-new">Aucun fichier</span>
+        </div>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-md-12">
+        <button id="SubmitFile" class="btn btn-primary">Démarrer l'import</button>
+    </div>
+</div>
+
+<script src="~/scripts/jasny-bootstrap.js"></script>
+
+@section scripts {
+    <script type="text/javascript">
+        $(document).ready(function () {
+            $("#MessageInfo").hide();
+            $("#MessageDanger").hide();
+            $("#MessageSuccess").hide();
+
+
+            $("#SubmitFile").click(function () {
+                $("#MessageInfo").show();
+                $("#MessageDanger").hide();
+                $("#MessageSuccess").hide();
+                var formData = new FormData();
+                formData.append('ImportFile', $('#ImportFile')[0].files[0]);
+                $.ajax({
+                    type: "POST",
+                    url: "/Project/Upload",
+                    data: formData,
+                    cache: false,
+                    contentType: false,
+                    processData: false,
+                    success: function (result) {
+                        $("#MessageInfo").hide();
+                        $("#MessageSuccess").show();
+                    },
+                    error: function (xhr, status, p3, p4) {
+                        $("#MessageInfo").hide();
+                        $("#MessageDanger > p").append(p3);
+                        $("#MessageDanger > p").append(xhr.responseText);
+                        $("#MessageDanger").show();
+                    }
+                });
+            });
+        });
+    </script>
+}
