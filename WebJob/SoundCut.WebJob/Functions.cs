@@ -40,7 +40,7 @@ namespace SoundCut.WebJob
             {
                 if (project.import_sound_file_name.Contains(".mp3"))
                 {
-                    var fileName = string.Format("project-{0}.mp3", project.id_project);
+                    var fileName = string.Format("project-{0}.mp3", project.id);
                     Stream stream = AzureBlobStorage.GetStream(fileName, "import");
                     CutSound.CutMp3(stream, project);
                 }

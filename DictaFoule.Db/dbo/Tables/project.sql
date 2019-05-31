@@ -7,5 +7,5 @@
     [creation_date]            DATETIME       NOT NULL,
     [state]                    INT            NOT NULL, 
     CONSTRAINT [PK_project] PRIMARY KEY CLUSTERED ([id_project] ASC),
-	CONSTRAINT [FK_user_guid] FOREIGN KEY ([id_user]) REFERENCES [dbo].[user]([id_user])
+	CONSTRAINT [FK_user_guid] FOREIGN KEY ([id_user]) REFERENCES [dbo].[user]([id])
 )

@@ -29,7 +29,7 @@ namespace SoundCut.WebJob
             while (mp3Frame != null)
             {
                 countByte = 0;
-                var fileNameOutput = string.Format("project-{0}-{1}.mp3", project.id_project, i);
+                var fileNameOutput = string.Format("project-{0}-{1}.mp3", project.id, i);
                 FileStream fileStream = new FileStream(fileNameOutput, FileMode.Create, FileAccess.ReadWrite);
                 while (mp3Frame != null && countByte < nbByteInMin)
                 {
@@ -42,9 +42,9 @@ namespace SoundCut.WebJob
                 fileStream.Close();
                 var soundline = new sound_line
                 {
-                    id_project = project.id_project,
-                    sound_file_name = fileNameOutput,
-                    sound_file_uri = project.import_sound_file_uri,
+                    id_project = project.id,
+                    name = fileNameOutput,
+                    uri = project.import_sound_file_uri,
                     creation_date = DateTime.UtcNow,
                     state = (int)SoundLineState.Create,
                 };
@@ -71,7 +71,7 @@ namespace SoundCut.WebJob
                 int bytesPerMillisecond = reader.WaveFormat.AverageBytesPerSecond / 1000;
                 while (position < reader.Length)
                 {
-                    var fileNameOutput = string.Format("project-{0}-{1}.wav", project.id_project, i);
+                    var fileNameOutput = string.Format("project-{0}-{1}.wav", project.id, i);
                     using (WaveFileWriter writer = new WaveFileWriter(fileNameOutput, reader.WaveFormat))
                     {
                         int startPos = (int)cutFromStart.TotalMilliseconds * bytesPerMillisecond;
@@ -88,9 +88,9 @@ namespace SoundCut.WebJob
                     AzureBlobStorage.Upload(ms, "audio/mpeg", fileNameOutput, "soundline");
                     var soundline = new sound_line
                     {
-                        id_project = project.id_project,
-                        sound_file_name = fileNameOutput,
-                        sound_file_uri = project.import_sound_file_uri,
+                        id_project = project.id,
+                        name = fileNameOutput,
+                        uri = project.import_sound_file_uri,
                         creation_date = DateTime.UtcNow,
                         state = (int)SoundLineState.Create,
                     };

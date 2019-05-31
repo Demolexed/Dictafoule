@@ -26,7 +26,7 @@ namespace DictaFoule.Common.DAL
         }
     
         public virtual DbSet<log> logs { get; set; }
-        public virtual DbSet<payment_stripe> payment_stripe { get; set; }
+        public virtual DbSet<order> orders { get; set; }
         public virtual DbSet<project> projects { get; set; }
         public virtual DbSet<sound_line> sound_line { get; set; }
         public virtual DbSet<user> users { get; set; }

@@ -59,7 +59,7 @@ namespace TextToTask.WebJob
 
                 foreach (var sound in soundlines)
                 {
-                    idTaskLine = Create.AddTaskLines(foulefactory, sound.sound_file_name, sound.sound_file_transcript, idProject.Value);
+                    idTaskLine = Create.AddTaskLines(foulefactory, sound.name, sound.transcript, idProject.Value);
                     if (!idTaskLine.HasValue)
                         throw new Exception("Task issue");
                     log.WriteLine("New task_line created " + idTaskLine.Value);
@@ -67,7 +67,7 @@ namespace TextToTask.WebJob
                     sound.state = (int)SoundLineState.Posted;
                     entities.Entry(sound).State = System.Data.Entity.EntityState.Modified;
                     entities.SaveChanges();
-                    LogTools.Add_log(LogLevel.INFO, "TextToTask", id_project, "posted " + sound.id_sound_line);
+                    LogTools.Add_log(LogLevel.INFO, "TextToTask", id_project, "posted " + sound.id);
                 }
 
                 //var idcsv = Create.AddcsvFile(foulefactory, soundlines, idProject.Value);

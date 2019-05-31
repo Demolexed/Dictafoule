@@ -4,7 +4,7 @@
   <edmx:Runtime>
     <!-- SSDL content -->
     <edmx:StorageModels>
-      <Schema Namespace="Model.Store" Provider="System.Data.SqlClient" ProviderManifestToken="2012" Alias="Self" xmlns:store="http://schemas.microsoft.com/ado/2007/12/edm/EntityStoreSchemaGenerator" xmlns:customannotation="http://schemas.microsoft.com/ado/2013/11/edm/customannotation" xmlns="http://schemas.microsoft.com/ado/2009/11/edm/ssdl">
+    <Schema Namespace="Model.Store" Provider="System.Data.SqlClient" ProviderManifestToken="2012.Azure" Alias="Self" xmlns:store="http://schemas.microsoft.com/ado/2007/12/edm/EntityStoreSchemaGenerator" xmlns:customannotation="http://schemas.microsoft.com/ado/2013/11/edm/customannotation" xmlns="http://schemas.microsoft.com/ado/2009/11/edm/ssdl">
         <EntityType Name="log">
           <Key>
             <PropertyRef Name="id_log" />
@@ -16,7 +16,7 @@
           <Property Name="message" Type="text" />
           <Property Name="creation_date" Type="datetime" Nullable="false" />
         </EntityType>
-        <EntityType Name="payment_stripe">
+        <EntityType Name="order">
           <Key>
             <PropertyRef Name="id_payment" />
           </Key>
@@ -26,13 +26,13 @@
           <Property Name="id_project" Type="int" Nullable="false" />
           <Property Name="email" Type="varchar(max)" Nullable="false" />
           <Property Name="name_customer" Type="varchar(max)" Nullable="false" />
-          <Property Name="date_payment" Type="datetime" Nullable="false" />
+          <Property Name="date" Type="datetime" Nullable="false" />
         </EntityType>
         <EntityType Name="project">
           <Key>
-            <PropertyRef Name="id_project" />
+            <PropertyRef Name="id" />
           </Key>
-          <Property Name="id_project" Type="int" StoreGeneratedPattern="Identity" Nullable="false" />
+          <Property Name="id" Type="int" StoreGeneratedPattern="Identity" Nullable="false" />
           <Property Name="import_sound_file_name" Type="varchar(max)" Nullable="false" />
           <Property Name="import_sound_file_uri" Type="varchar(max)" />
           <Property Name="id_user" Type="int" />
@@ -41,13 +41,13 @@
         </EntityType>
         <EntityType Name="sound_line">
           <Key>
-            <PropertyRef Name="id_sound_line" />
+            <PropertyRef Name="id" />
           </Key>
-          <Property Name="id_sound_line" Type="int" StoreGeneratedPattern="Identity" Nullable="false" />
+          <Property Name="id" Type="int" StoreGeneratedPattern="Identity" Nullable="false" />
           <Property Name="id_project" Type="int" Nullable="false" />
-          <Property Name="sound_file_name" Type="varchar(max)" Nullable="false" />
-          <Property Name="sound_file_uri" Type="varchar(max)" Nullable="false" />
-          <Property Name="sound_file_transcript" Type="text" />
+          <Property Name="name" Type="varchar(max)" Nullable="false" />
+          <Property Name="uri" Type="varchar(max)" Nullable="false" />
+          <Property Name="transcript" Type="text" />
           <Property Name="creation_date" Type="datetime" Nullable="false" />
           <Property Name="state" Type="int" Nullable="false" />
           <Property Name="id_taskline" Type="int" />
@@ -55,20 +55,32 @@
         </EntityType>
         <EntityType Name="user">
           <Key>
-            <PropertyRef Name="id_user" />
+            <PropertyRef Name="id" />
           </Key>
-          <Property Name="id_user" Type="int" StoreGeneratedPattern="Identity" Nullable="false" />
+          <Property Name="id" Type="int" StoreGeneratedPattern="Identity" Nullable="false" />
           <Property Name="email" Type="nvarchar(max)" />
           <Property Name="password" Type="nvarchar(max)" />
           <Property Name="guid" Type="varchar(max)" />
           <Property Name="right" Type="int" />
         </EntityType>
+        <Association Name="FK_project_order">
+          <End Role="project" Type="Self.project" Multiplicity="1" />
+          <End Role="order" Type="Self.order" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="project">
+              <PropertyRef Name="id" />
+            </Principal>
+            <Dependent Role="order">
+              <PropertyRef Name="id_project" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
         <Association Name="FK_project_sound_line">
           <End Role="project" Type="Self.project" Multiplicity="1" />
           <End Role="sound_line" Type="Self.sound_line" Multiplicity="*" />
           <ReferentialConstraint>
             <Principal Role="project">
-              <PropertyRef Name="id_project" />
+              <PropertyRef Name="id" />
             </Principal>
             <Dependent Role="sound_line">
               <PropertyRef Name="id_project" />
@@ -80,7 +92,7 @@
           <End Role="project" Type="Self.project" Multiplicity="*" />
           <ReferentialConstraint>
             <Principal Role="user">
-              <PropertyRef Name="id_user" />
+              <PropertyRef Name="id" />
             </Principal>
             <Dependent Role="project">
               <PropertyRef Name="id_user" />
@@ -89,10 +101,14 @@
         </Association>
         <EntityContainer Name="ModelStoreContainer">
           <EntitySet Name="log" EntityType="Self.log" Schema="dbo" store:Type="Tables" />
-          <EntitySet Name="payment_stripe" EntityType="Self.payment_stripe" Schema="dbo" store:Type="Tables" />
+          <EntitySet Name="order" EntityType="Self.order" Schema="dbo" store:Type="Tables" />
           <EntitySet Name="project" EntityType="Self.project" Schema="dbo" store:Type="Tables" />
           <EntitySet Name="sound_line" EntityType="Self.sound_line" Schema="dbo" store:Type="Tables" />
           <EntitySet Name="user" EntityType="Self.user" Schema="dbo" store:Type="Tables" />
+          <AssociationSet Name="FK_project_order" Association="Self.FK_project_order">
+            <End Role="project" EntitySet="project" />
+            <End Role="order" EntitySet="order" />
+          </AssociationSet>
           <AssociationSet Name="FK_project_sound_line" Association="Self.FK_project_sound_line">
             <End Role="project" EntitySet="project" />
             <End Role="sound_line" EntitySet="sound_line" />
@@ -102,8 +118,7 @@
             <End Role="project" EntitySet="project" />
           </AssociationSet>
         </EntityContainer>
-      </Schema>
-    </edmx:StorageModels>
+      </Schema></edmx:StorageModels>
     <!-- CSDL content -->
     <edmx:ConceptualModels>
       <Schema Namespace="Model" Alias="Self" annotation:UseStrongSpatialTypes="false" xmlns:annotation="http://schemas.microsoft.com/ado/2009/02/edm/annotation" xmlns:customannotation="http://schemas.microsoft.com/ado/2013/11/edm/customannotation" xmlns="http://schemas.microsoft.com/ado/2009/11/edm">
@@ -118,63 +133,96 @@
           <Property Name="message" Type="String" MaxLength="Max" FixedLength="false" Unicode="false" />
           <Property Name="creation_date" Type="DateTime" Nullable="false" Precision="3" />
         </EntityType>
-        <EntityType Name="payment_stripe">
+        <EntityContainer Name="Entities" annotation:LazyLoadingEnabled="true">
+          <EntitySet Name="logs" EntityType="Self.log" />
+          <EntitySet Name="orders" EntityType="Model.order" />
+          <EntitySet Name="projects" EntityType="Model.project" />
+          <EntitySet Name="sound_line" EntityType="Model.sound_line" />
+          <EntitySet Name="users" EntityType="Model.user" />
+          <AssociationSet Name="FK_project_order" Association="Model.FK_project_order">
+            <End Role="project" EntitySet="projects" />
+            <End Role="order" EntitySet="orders" />
+          </AssociationSet>
+          <AssociationSet Name="FK_project_sound_line" Association="Model.FK_project_sound_line">
+            <End Role="project" EntitySet="projects" />
+            <End Role="sound_line" EntitySet="sound_line" />
+          </AssociationSet>
+          <AssociationSet Name="FK_user_guid" Association="Model.FK_user_guid">
+            <End Role="user" EntitySet="users" />
+            <End Role="project" EntitySet="projects" />
+          </AssociationSet>
+        </EntityContainer>
+        <EntityType Name="order">
           <Key>
             <PropertyRef Name="id_payment" />
           </Key>
           <Property Name="id_payment" Type="Int32" Nullable="false" annotation:StoreGeneratedPattern="Identity" />
-          <Property Name="id_stripe" Type="String" MaxLength="Max" FixedLength="false" Unicode="false" Nullable="false" />
+          <Property Name="id_stripe" Type="String" Nullable="false" MaxLength="Max" FixedLength="false" Unicode="false" />
           <Property Name="amount" Type="Int32" Nullable="false" />
           <Property Name="id_project" Type="Int32" Nullable="false" />
-          <Property Name="email" Type="String" MaxLength="Max" FixedLength="false" Unicode="false" Nullable="false" />
-          <Property Name="name_customer" Type="String" MaxLength="Max" FixedLength="false" Unicode="false" Nullable="false" />
-          <Property Name="date_payment" Type="DateTime" Nullable="false" Precision="3" />
+          <Property Name="email" Type="String" Nullable="false" MaxLength="Max" FixedLength="false" Unicode="false" />
+          <Property Name="name_customer" Type="String" Nullable="false" MaxLength="Max" FixedLength="false" Unicode="false" />
+          <Property Name="date" Type="DateTime" Nullable="false" Precision="3" />
+          <NavigationProperty Name="project" Relationship="Model.FK_project_order" FromRole="order" ToRole="project" />
         </EntityType>
         <EntityType Name="project">
           <Key>
-            <PropertyRef Name="id_project" />
+            <PropertyRef Name="id" />
           </Key>
-          <Property Name="id_project" Type="Int32" Nullable="false" annotation:StoreGeneratedPattern="Identity" />
-          <Property Name="import_sound_file_name" Type="String" MaxLength="Max" FixedLength="false" Unicode="false" Nullable="false" />
+          <Property Name="id" Type="Int32" Nullable="false" annotation:StoreGeneratedPattern="Identity" />
+          <Property Name="import_sound_file_name" Type="String" Nullable="false" MaxLength="Max" FixedLength="false" Unicode="false" />
           <Property Name="import_sound_file_uri" Type="String" MaxLength="Max" FixedLength="false" Unicode="false" />
           <Property Name="id_user" Type="Int32" />
           <Property Name="creation_date" Type="DateTime" Nullable="false" Precision="3" />
           <Property Name="state" Type="Int32" Nullable="false" />
-          <NavigationProperty Name="sound_line" Relationship="Self.FK_project_sound_line" FromRole="project" ToRole="sound_line" />
-          <NavigationProperty Name="user" Relationship="Self.FK_user_guid" FromRole="project" ToRole="user" />
+          <NavigationProperty Name="orders" Relationship="Model.FK_project_order" FromRole="project" ToRole="order" />
+          <NavigationProperty Name="sound_line" Relationship="Model.FK_project_sound_line" FromRole="project" ToRole="sound_line" />
+          <NavigationProperty Name="user" Relationship="Model.FK_user_guid" FromRole="project" ToRole="user" />
         </EntityType>
         <EntityType Name="sound_line">
           <Key>
-            <PropertyRef Name="id_sound_line" />
+            <PropertyRef Name="id" />
           </Key>
-          <Property Name="id_sound_line" Type="Int32" Nullable="false" annotation:StoreGeneratedPattern="Identity" />
+          <Property Name="id" Type="Int32" Nullable="false" annotation:StoreGeneratedPattern="Identity" />
           <Property Name="id_project" Type="Int32" Nullable="false" />
-          <Property Name="sound_file_name" Type="String" MaxLength="Max" FixedLength="false" Unicode="false" Nullable="false" />
-          <Property Name="sound_file_uri" Type="String" MaxLength="Max" FixedLength="false" Unicode="false" Nullable="false" />
-          <Property Name="sound_file_transcript" Type="String" MaxLength="Max" FixedLength="false" Unicode="false" />
+          <Property Name="name" Type="String" Nullable="false" MaxLength="Max" FixedLength="false" Unicode="false" />
+          <Property Name="uri" Type="String" Nullable="false" MaxLength="Max" FixedLength="false" Unicode="false" />
+          <Property Name="transcript" Type="String" MaxLength="Max" FixedLength="false" Unicode="false" />
           <Property Name="creation_date" Type="DateTime" Nullable="false" Precision="3" />
           <Property Name="state" Type="Int32" Nullable="false" />
           <Property Name="id_taskline" Type="Int32" />
           <Property Name="task_answer" Type="String" MaxLength="Max" FixedLength="false" Unicode="false" />
-          <NavigationProperty Name="project" Relationship="Self.FK_project_sound_line" FromRole="sound_line" ToRole="project" />
+          <NavigationProperty Name="project" Relationship="Model.FK_project_sound_line" FromRole="sound_line" ToRole="project" />
         </EntityType>
         <EntityType Name="user">
           <Key>
-            <PropertyRef Name="id_user" />
+            <PropertyRef Name="id" />
           </Key>
-          <Property Name="id_user" Type="Int32" Nullable="false" annotation:StoreGeneratedPattern="Identity" />
+          <Property Name="id" Type="Int32" Nullable="false" annotation:StoreGeneratedPattern="Identity" />
           <Property Name="email" Type="String" MaxLength="Max" FixedLength="false" Unicode="true" />
           <Property Name="password" Type="String" MaxLength="Max" FixedLength="false" Unicode="true" />
           <Property Name="guid" Type="String" MaxLength="Max" FixedLength="false" Unicode="false" />
           <Property Name="right" Type="Int32" />
-          <NavigationProperty Name="projects" Relationship="Self.FK_user_guid" FromRole="user" ToRole="project" />
+          <NavigationProperty Name="projects" Relationship="Model.FK_user_guid" FromRole="user" ToRole="project" />
         </EntityType>
-        <Association Name="FK_project_sound_line">
-          <End Role="project" Type="Self.project" Multiplicity="1" />
-          <End Role="sound_line" Type="Self.sound_line" Multiplicity="*" />
+        <Association Name="FK_project_order">
+          <End Type="Model.project" Role="project" Multiplicity="1" />
+          <End Type="Model.order" Role="order" Multiplicity="*" />
           <ReferentialConstraint>
             <Principal Role="project">
+              <PropertyRef Name="id" />
+            </Principal>
+            <Dependent Role="order">
               <PropertyRef Name="id_project" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="FK_project_sound_line">
+          <End Type="Model.project" Role="project" Multiplicity="1" />
+          <End Type="Model.sound_line" Role="sound_line" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="project">
+              <PropertyRef Name="id" />
             </Principal>
             <Dependent Role="sound_line">
               <PropertyRef Name="id_project" />
@@ -182,32 +230,17 @@
           </ReferentialConstraint>
         </Association>
         <Association Name="FK_user_guid">
-          <End Role="user" Type="Self.user" Multiplicity="0..1" />
-          <End Role="project" Type="Self.project" Multiplicity="*" />
+          <End Type="Model.user" Role="user" Multiplicity="0..1" />
+          <End Type="Model.project" Role="project" Multiplicity="*" />
           <ReferentialConstraint>
             <Principal Role="user">
-              <PropertyRef Name="id_user" />
+              <PropertyRef Name="id" />
             </Principal>
             <Dependent Role="project">
               <PropertyRef Name="id_user" />
             </Dependent>
           </ReferentialConstraint>
         </Association>
-        <EntityContainer Name="Entities" annotation:LazyLoadingEnabled="true">
-          <EntitySet Name="logs" EntityType="Self.log" />
-          <EntitySet Name="payment_stripe" EntityType="Self.payment_stripe" />
-          <EntitySet Name="projects" EntityType="Self.project" />
-          <EntitySet Name="sound_line" EntityType="Self.sound_line" />
-          <EntitySet Name="users" EntityType="Self.user" />
-          <AssociationSet Name="FK_project_sound_line" Association="Self.FK_project_sound_line">
-            <End Role="project" EntitySet="projects" />
-            <End Role="sound_line" EntitySet="sound_line" />
-          </AssociationSet>
-          <AssociationSet Name="FK_user_guid" Association="Self.FK_user_guid">
-            <End Role="user" EntitySet="users" />
-            <End Role="project" EntitySet="projects" />
-          </AssociationSet>
-        </EntityContainer>
       </Schema>
     </edmx:ConceptualModels>
     <!-- C-S mapping content -->
@@ -226,54 +259,54 @@
               </MappingFragment>
             </EntityTypeMapping>
           </EntitySetMapping>
-          <EntitySetMapping Name="payment_stripe">
-            <EntityTypeMapping TypeName="Model.payment_stripe">
-              <MappingFragment StoreEntitySet="payment_stripe">
-                <ScalarProperty Name="id_payment" ColumnName="id_payment" />
-                <ScalarProperty Name="id_stripe" ColumnName="id_stripe" />
-                <ScalarProperty Name="amount" ColumnName="amount" />
-                <ScalarProperty Name="id_project" ColumnName="id_project" />
-                <ScalarProperty Name="email" ColumnName="email" />
+          <EntitySetMapping Name="orders">
+            <EntityTypeMapping TypeName="Model.order">
+              <MappingFragment StoreEntitySet="order">
+                <ScalarProperty Name="date" ColumnName="date" />
                 <ScalarProperty Name="name_customer" ColumnName="name_customer" />
-                <ScalarProperty Name="date_payment" ColumnName="date_payment" />
+                <ScalarProperty Name="email" ColumnName="email" />
+                <ScalarProperty Name="id_project" ColumnName="id_project" />
+                <ScalarProperty Name="amount" ColumnName="amount" />
+                <ScalarProperty Name="id_stripe" ColumnName="id_stripe" />
+                <ScalarProperty Name="id_payment" ColumnName="id_payment" />
               </MappingFragment>
             </EntityTypeMapping>
           </EntitySetMapping>
           <EntitySetMapping Name="projects">
             <EntityTypeMapping TypeName="Model.project">
               <MappingFragment StoreEntitySet="project">
-                <ScalarProperty Name="id_project" ColumnName="id_project" />
-                <ScalarProperty Name="import_sound_file_name" ColumnName="import_sound_file_name" />
-                <ScalarProperty Name="import_sound_file_uri" ColumnName="import_sound_file_uri" />
-                <ScalarProperty Name="id_user" ColumnName="id_user" />
-                <ScalarProperty Name="creation_date" ColumnName="creation_date" />
                 <ScalarProperty Name="state" ColumnName="state" />
+                <ScalarProperty Name="creation_date" ColumnName="creation_date" />
+                <ScalarProperty Name="id_user" ColumnName="id_user" />
+                <ScalarProperty Name="import_sound_file_uri" ColumnName="import_sound_file_uri" />
+                <ScalarProperty Name="import_sound_file_name" ColumnName="import_sound_file_name" />
+                <ScalarProperty Name="id" ColumnName="id" />
               </MappingFragment>
             </EntityTypeMapping>
           </EntitySetMapping>
           <EntitySetMapping Name="sound_line">
             <EntityTypeMapping TypeName="Model.sound_line">
               <MappingFragment StoreEntitySet="sound_line">
-                <ScalarProperty Name="id_sound_line" ColumnName="id_sound_line" />
-                <ScalarProperty Name="id_project" ColumnName="id_project" />
-                <ScalarProperty Name="sound_file_name" ColumnName="sound_file_name" />
-                <ScalarProperty Name="sound_file_uri" ColumnName="sound_file_uri" />
-                <ScalarProperty Name="sound_file_transcript" ColumnName="sound_file_transcript" />
-                <ScalarProperty Name="creation_date" ColumnName="creation_date" />
-                <ScalarProperty Name="state" ColumnName="state" />
-                <ScalarProperty Name="id_taskline" ColumnName="id_taskline" />
                 <ScalarProperty Name="task_answer" ColumnName="task_answer" />
+                <ScalarProperty Name="id_taskline" ColumnName="id_taskline" />
+                <ScalarProperty Name="state" ColumnName="state" />
+                <ScalarProperty Name="creation_date" ColumnName="creation_date" />
+                <ScalarProperty Name="transcript" ColumnName="transcript" />
+                <ScalarProperty Name="uri" ColumnName="uri" />
+                <ScalarProperty Name="name" ColumnName="name" />
+                <ScalarProperty Name="id_project" ColumnName="id_project" />
+                <ScalarProperty Name="id" ColumnName="id" />
               </MappingFragment>
             </EntityTypeMapping>
           </EntitySetMapping>
           <EntitySetMapping Name="users">
             <EntityTypeMapping TypeName="Model.user">
               <MappingFragment StoreEntitySet="user">
-                <ScalarProperty Name="id_user" ColumnName="id_user" />
-                <ScalarProperty Name="email" ColumnName="email" />
-                <ScalarProperty Name="password" ColumnName="password" />
-                <ScalarProperty Name="guid" ColumnName="guid" />
                 <ScalarProperty Name="right" ColumnName="right" />
+                <ScalarProperty Name="guid" ColumnName="guid" />
+                <ScalarProperty Name="password" ColumnName="password" />
+                <ScalarProperty Name="email" ColumnName="email" />
+                <ScalarProperty Name="id" ColumnName="id" />
               </MappingFragment>
             </EntityTypeMapping>
           </EntitySetMapping>

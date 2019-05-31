@@ -14,6 +14,7 @@ namespace SpeechToText.WebJob
 {
     public class Functions
     {
+        [FunctionName("speechtotext")]
         public static void ProcessQueueMessage([QueueTrigger("speechtotext")] int id_project, TextWriter log)
         {
             log.WriteLine("SpeechToText start - id_sound_line: " + id_project);
@@ -46,13 +47,13 @@ namespace SpeechToText.WebJob
                     {
 
                         SpeechmaticsClient speech = new SpeechmaticsClient();
-                        var job = speech.CreateTranscriptionJob(soundline.sound_file_name, AzureBlobStorage.GetStream(soundline.sound_file_name, "soundline"), false);
+                        var job = speech.CreateTranscriptionJob(soundline.name, AzureBlobStorage.GetStream(soundline.name, "soundline"), false);
                         var text = speech.getSpeech(job.Job);
-                        soundline.sound_file_transcript = text;
+                        soundline.transcript = text;
                         soundline.state = (int)SoundLineState.Translate;
                         entities.Entry(soundline).State = System.Data.Entity.EntityState.Modified;
                         entities.SaveChanges();
-                        LogTools.Add_log(LogLevel.INFO, "SpeechToText", soundline.id_project, "SpeechToText succes " + soundline.id_sound_line);
+                        LogTools.Add_log(LogLevel.INFO, "SpeechToText", soundline.id_project, "SpeechToText succes " + soundline.id);
                         log.WriteLine("SpeechToText success - id_sound_line: " + id_project);
                     }
                 }

@@ -11,11 +11,11 @@ using System.Net;
 using System.IO;
 using SendGrid;
 using SendGrid.Helpers.Mail;
-using Novacode;
 using System.Drawing;
 using System.Configuration;
 using Stripe;
 using Newtonsoft.Json;
+using Xceed.Words.NET;
 
 namespace DictaFoule.API.Controllers
 {
@@ -45,7 +45,7 @@ namespace DictaFoule.API.Controllers
                     creation_date = DateTime.UtcNow,
                     state = 0,
                     import_sound_file_name = ImportFile.Name,
-                    id_user = user.FirstOrDefault().id_user
+                    id_user = user.FirstOrDefault().id
                 };
                 entities.projects.Add(importFile);
                 entities.SaveChanges();
@@ -60,8 +60,8 @@ namespace DictaFoule.API.Controllers
                 entities.Entry(importFile).State = EntityState.Modified;
                 entities.SaveChanges();
 
-                LogTools.Add_log(LogLevel.INFO, " API CREATE PROJECT", importFile.id_project, "new project" );
-                return Ok(importFile.id_project);
+                LogTools.Add_log(LogLevel.INFO, " API CREATE PROJECT", importFile.id, "new project" );
+                return Ok(importFile.id);
             }
             catch (Exception ex)
             {
@@ -122,12 +122,12 @@ namespace DictaFoule.API.Controllers
             var user = entities.users.Where(a => a.guid == guidElements).ToList();
             if (user.Count == 0)
                 return NotFound();
-            var id_user = user.FirstOrDefault().id_user;
+            var id_user = user.FirstOrDefault().id;
             var project = entities.projects.Where(p => p.import_sound_file_name == nameFile && p.id_user == id_user).ToList();
             if (project.Count == 0)
                 return NotFound();
             else
-                return Ok(project.FirstOrDefault().id_project);
+                return Ok(project.FirstOrDefault().id);
         }
 
         [HttpPost]
@@ -145,7 +145,7 @@ namespace DictaFoule.API.Controllers
                 };
                 entities.users.Add(user);
                 entities.SaveChanges();
-                LogTools.Add_log(LogLevel.INFO, " API CREATE USER", 0, "new user " + user.id_user);
+                LogTools.Add_log(LogLevel.INFO, " API CREATE USER", 0, "new user " + user.id);
                 return Ok();
             }
             catch (Exception ex)
@@ -173,7 +173,7 @@ namespace DictaFoule.API.Controllers
             foreach (var text in texts)
             {
                 Paragraph par = doc.InsertParagraph();
-                par.Append(text.task_answer).Font(new FontFamily("Times New Roman"));
+                par.Append(text.task_answer).Font("Times New Roman");
                 doc.Save();
             }
 
@@ -210,31 +210,31 @@ namespace DictaFoule.API.Controllers
             string idproject = Convert.ToString(paymentModel.IdProject);
             var project = entities.projects.Find(paymentModel.IdProject);
 
-            var charge = new StripeChargeCreateOptions
+            var charge = new ChargeCreateOptions
             {
                 Amount = Convert.ToInt32(paymentModel.Amount * 100),
                 Currency = "eur",
                 Description = String.Format("Dictafoule project {0} - projectName {1} ", idproject, project.import_sound_file_name),
-                SourceTokenOrExistingSourceId = paymentModel.Token
+                SourceId = paymentModel.Token
             };
 
-            var service = new StripeChargeService(ConfigurationManager.AppSettings["APISTRIPE"]);
+            var service = new ChargeService(ConfigurationManager.AppSettings["APISTRIPE"]);
 
             try
             {
                 var response = service.Create(charge);
                 if (response.Status == "succeeded")
                 {
-                    var payment = new payment_stripe
+                    var payment = new order
                     {
                         id_stripe = response.Id,
-                        amount = response.Amount,
+                        amount = unchecked((int)response.Amount),
                         id_project = paymentModel.IdProject,
                         email = paymentModel.Email,
                         name_customer = paymentModel.Name,
-                        date_payment = DateTime.UtcNow
+                        date = DateTime.UtcNow
                     };
-                    entities.payment_stripe.Add(payment);
+                    entities.orders.Add(payment);
                     entities.SaveChanges();
                     ProjectTools.UpdateProjectState(paymentModel.IdProject, ProjectState.SoundCut);
                    AzureQueueStorage.QueueProject(paymentModel.IdProject, "soundcut");

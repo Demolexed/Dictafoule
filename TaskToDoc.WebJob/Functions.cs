@@ -13,7 +13,6 @@ using DictaFoule.Common.Enum;
 using System.Data.Entity;
 using TaskToDoc.WebJob.Models;
 using DictaFoule.Common.Tools;
-using Novacode;
 using System.Drawing;
 using SendGrid;
 using SendGrid.Helpers.Mail;
@@ -75,8 +74,8 @@ namespace TaskToDoc.WebJob
         {
             var entities = new Entities();
             var project = entities.projects.Find(idproject);
-            var email = entities.payment_stripe.Where(p => p.id_project == idproject).ToList();
-            var users = entities.users.Where(u => u.id_user == project.id_user).ToList();
+            var email = entities.orders.Where(p => p.id_project == idproject).ToList();
+            var users = entities.users.Where(u => u.id == project.id_user).ToList();
             SendEmailModel sendEmailModel = new SendEmailModel() { IdProject = idproject, Email = email.FirstOrDefault().email, GuidElements = users.FirstOrDefault().guid };
             
             try
