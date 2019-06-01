@@ -14,11 +14,11 @@ namespace DictaFoule.Common.DAL
     
     public partial class sound_line
     {
-        public int id_sound_line { get; set; }
+        public int id { get; set; }
         public int id_project { get; set; }
-        public string sound_file_name { get; set; }
-        public string sound_file_uri { get; set; }
-        public string sound_file_transcript { get; set; }
+        public string name { get; set; }
+        public string uri { get; set; }
+        public string transcript { get; set; }
         public System.DateTime creation_date { get; set; }
         public int state { get; set; }
         public Nullable<int> id_taskline { get; set; }

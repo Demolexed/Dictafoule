@@ -51,7 +51,7 @@ namespace DictaFoule.Web.Controllers
         {
             var md5password = Encrypt.GetMd5Hash(password);
             var User = entities.users.FirstOrDefault(u => u.email == login && u.password == md5password);
-            return User.id_user.ToString();
+            return User.id.ToString();
         }
 
         private bool ValidateUser(string login, string password)

@@ -8,7 +8,7 @@
     <SchemaVersion>2.0</SchemaVersion>
     <ProjectVersion>4.1</ProjectVersion>
     <ProjectGuid>{3cb218ed-b1e1-4496-8072-6f59425d52ee}</ProjectGuid>
-    <DSP>Microsoft.Data.Tools.Schema.Sql.Sql110DatabaseSchemaProvider</DSP>
+    <DSP>Microsoft.Data.Tools.Schema.Sql.SqlAzureDatabaseSchemaProvider</DSP>
     <OutputType>Database</OutputType>
     <RootPath>
     </RootPath>
@@ -66,7 +66,7 @@
     <Build Include="dbo\Tables\project.sql" />
     <Build Include="dbo\Tables\sound_line.sql" />
     <Build Include="dbo\Tables\log.sql" />
-    <Build Include="dbo\Tables\payment_stripe.sql" />
+    <Build Include="dbo\Tables\order.sql" />
   </ItemGroup>
   <ItemGroup>
     <None Include="publish\SoYouStart.DictaFoule.Db.publish.xml" />

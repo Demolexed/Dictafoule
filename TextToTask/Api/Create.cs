@@ -129,7 +129,7 @@ namespace TextToTask.WebJob.Api
 
             foreach (var sound in soundlines)
             {
-                csv += AzureBlobStorage.Get(sound.sound_file_name, "soundline") + ";" + sound.sound_file_transcript;
+                csv += AzureBlobStorage.Get(sound.name, "soundline") + ";" + sound.transcript;
             }
 
 

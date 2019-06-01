@@ -20,7 +20,7 @@ namespace DictaFoule.Common.DAL
             this.projects = new HashSet<project>();
         }
     
-        public int id_user { get; set; }
+        public int id { get; set; }
         public string email { get; set; }
         public string password { get; set; }
         public string guid { get; set; }

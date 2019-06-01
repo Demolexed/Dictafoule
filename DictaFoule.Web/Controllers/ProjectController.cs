@@ -12,8 +12,8 @@ using System.Web.Mvc;
 using Newtonsoft.Json;
 using System.Threading.Tasks;
 using System.IO;
-using Novacode;
 using System.Drawing;
+using Xceed.Words.NET;
 
 namespace DictaFoule.Web.Controllers
 {
@@ -25,7 +25,7 @@ namespace DictaFoule.Web.Controllers
             {
                 CreationDate = p.creation_date,
                 FileName = p.import_sound_file_name,
-                IdProject = p.id_project,
+                IdProject = p.id,
                 ImportUri = p.import_sound_file_uri,
                 State = (ProjectState)p.state
             }).ToList();
@@ -60,7 +60,7 @@ namespace DictaFoule.Web.Controllers
             if (DataValidation.IsMp3(ImportFile.FileName))
                 format = "mp3";
 
-            var fileName = string.Format("project-{0}.{1}", importFile.id_project, format);
+            var fileName = string.Format("project-{0}.{1}", importFile.id, format);
             var absoluteUri = AzureBlobStorage.Upload(ImportFile, fileName, "import");
 
             if (string.IsNullOrWhiteSpace(absoluteUri))
@@ -70,8 +70,8 @@ namespace DictaFoule.Web.Controllers
             entities.Entry(importFile).State = EntityState.Modified;
             entities.SaveChanges();
 
-            ProjectTools.UpdateProjectState(importFile.id_project, ProjectState.SoundCut);
-            AzureQueueStorage.QueueProject(importFile.id_project, "soundcut");
+            ProjectTools.UpdateProjectState(importFile.id, ProjectState.SoundCut);
+            AzureQueueStorage.QueueProject(importFile.id, "soundcut");
 
             return Json(new { AbsoluteUri = absoluteUri });
         }
@@ -98,7 +98,7 @@ namespace DictaFoule.Web.Controllers
                 {
                     Paragraph par = doc.InsertParagraph();
                     par.Append("[" + time.ToString("g") + "]\n");
-                    par.Append(text.task_answer).Font(new FontFamily("Times New Roman"));
+                    par.Append(text.task_answer).Font("Times New Roman");
                     doc.Save();
                     time = time.Add(TimeSpan.FromMinutes(1));
                 }
