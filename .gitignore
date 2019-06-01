@@ -245,3 +245,5 @@ ModelManifest.xml
 .fake/
 /Clicker/Clicker.Db/Clicker.Db.jfm
 /DictaFoule/DictaFoule.Db/DictaFoule.Db.jfm
+
+*.jfm
