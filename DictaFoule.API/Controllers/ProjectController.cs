@@ -106,15 +106,7 @@ namespace DictaFoule.API.Controllers
             return Ok(project.state);
         }
 
-        [HttpGet]
-        [Route("v1/Project/GetUser")]
-        public IHttpActionResult GetUser(string guidElements)
-        {
-            var user = entities.users.Where(a => a.guid == guidElements).ToList();
-            if (user.Count == 0)
-                return InternalServerError();
-            return Ok();
-        }
+        
         [HttpGet]
         [Route("v1/Project/GetIdProject")]
         public IHttpActionResult GetIdProject(string nameFile, string guidElements)
@@ -130,30 +122,7 @@ namespace DictaFoule.API.Controllers
                 return Ok(project.FirstOrDefault().id);
         }
 
-        [HttpPost]
-        [Route("v1/Project/CreateUser")]
-        public IHttpActionResult CreateUser(Object model)
-        {
-            var jsonmodel = model.ToString();
-            var usermodel = JsonConvert.DeserializeObject<UserModel>(jsonmodel);
-            try
-            {
-                var user = new user
-                {
-                    guid = usermodel.Guid,
-                    right = (int)RightAcces.User
-                };
-                entities.users.Add(user);
-                entities.SaveChanges();
-                LogTools.Add_log(LogLevel.INFO, " API CREATE USER", 0, "new user " + user.id);
-                return Ok();
-            }
-            catch (Exception ex)
-            {
-                LogTools.Add_log(LogLevel.DANGER, " API CREATE USER", 0, "Fail create user " + ex.Message);
-                return InternalServerError(ex);
-            }
-        }
+        
         [HttpPost]
         [Route("v1/Project/SendEmail")]
         public async System.Threading.Tasks.Task<IHttpActionResult> SendEmail(Object model)
