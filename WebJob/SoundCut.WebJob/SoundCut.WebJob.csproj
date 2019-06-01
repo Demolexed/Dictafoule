@@ -205,7 +205,7 @@
   <ItemGroup>
     <None Include="App.config" />
     <None Include="packages.config" />
-    <None Include="Properties\PublishProfiles\ff-prod-dictafoule - Web Deploy.pubxml" />
+    <None Include="Properties\PublishProfiles\dev-api-omink-dictafoule - Web Deploy.pubxml" />
     <None Include="Properties\webjob-publish-settings.json" />
   </ItemGroup>
   <ItemGroup>
