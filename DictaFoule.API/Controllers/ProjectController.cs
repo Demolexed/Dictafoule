@@ -16,52 +16,57 @@ using System.Configuration;
 using Stripe;
 using Newtonsoft.Json;
 using Xceed.Words.NET;
+using System.Text;
 
 namespace DictaFoule.API.Controllers
 {
     public class ProjectController : BaseController
     {
+        /// <summary>
+        /// Create d'un nouveau projet Dictafoule
+        /// </summary>
+        /// <param name="importFile"></param>
+        /// <returns></returns>
         [HttpPost]
         [Route("v1/Project/Create")]
-        public IHttpActionResult Create(Object model)
+        public IHttpActionResult Create(SoundFileModel importFile)
         {
-            var jsonmodel = model.ToString();
-            var ImportFile = JsonConvert.DeserializeObject<SoundFileModel>(jsonmodel);
-            var user = entities.users.Where(a => a.guid == ImportFile.Guid).ToList();
+            var user = entities.users.Where(a => a.guid == importFile.Guid).ToList();
             if (user.Count == 0)
                 return BadRequest("User not found");
             try
             {
-                var file = DecodeEncodeTo64.DecodeFrom64(ImportFile.File64);
+                var file = DecodeEncodeTo64.DecodeFrom64(importFile.File64);
                 file.Position = 0;
                 if (file == null)
                     return BadRequest("Le fichier est null");
                 if (file.Length == 0)
                     return BadRequest("Le fichier est vide");
-                if (!DataValidation.IsMp3(ImportFile.Name) && !DataValidation.IsWav(ImportFile.Name))
+                if (!DataValidation.IsMp3(importFile.Name) && !DataValidation.IsWav(importFile.Name))
                     return BadRequest("Le fichier n'est pas au bon format");
-                var importFile = new project
+
+                var Myproject = new project
                 {
                     creation_date = DateTime.UtcNow,
                     state = 0,
-                    import_sound_file_name = ImportFile.Name,
+                    import_sound_file_name = importFile.Name,
                     id_user = user.FirstOrDefault().id
                 };
-                entities.projects.Add(importFile);
+                entities.projects.Add(Myproject);
                 entities.SaveChanges();
 
 
-                var absoluteUri = AzureBlobStorage.Upload(file, "audio/mpeg", ImportFile.Name, "import");
+                var absoluteUri = AzureBlobStorage.Upload(file, "audio/mpeg", importFile.Name, "import");
 
                 if (string.IsNullOrWhiteSpace(absoluteUri))
                     return BadRequest("Un problème est survenu pendant l'upload du fichier");
 
-                importFile.import_sound_file_uri = absoluteUri;
-                entities.Entry(importFile).State = EntityState.Modified;
+                Myproject.import_sound_file_uri = absoluteUri;
+                entities.Entry(Myproject).State = EntityState.Modified;
                 entities.SaveChanges();
 
-                LogTools.Add_log(LogLevel.INFO, " API CREATE PROJECT", importFile.id, "new project" );
-                return Ok(importFile.id);
+                LogTools.Add_log(LogLevel.INFO, " API CREATE PROJECT", Myproject.id, "new project" );
+                return Ok(Myproject.id);
             }
             catch (Exception ex)
             {
@@ -70,29 +75,41 @@ namespace DictaFoule.API.Controllers
                 return BadRequest(ex.Message);
             }
         }
-
+        
+        /// <summary>
+        /// Recuperer la transcription du projet
+        /// </summary>
+        /// <param name="id_project"></param>
+        /// <param name="guidElements"></param>
+        /// <returns></returns>
         [HttpGet]
         [Route("v1/Project/GetTranscrib")]
-        public HttpResponseMessage GetTransbrib(int id_project, string guidElements)
+        public IHttpActionResult GetTransbrib(int id_project, string guidElements)
         {
             var project = entities.projects.Find(id_project);
             if (project == null)
-                return new HttpResponseMessage(HttpStatusCode.NotFound);
+                return NotFound();
             var id_user = entities.users.Find(project.id_user);
             if (id_user.guid != guidElements)
-                return new HttpResponseMessage(HttpStatusCode.NotFound);
-            var response = new HttpResponseMessage(HttpStatusCode.OK);
+                return NotFound();
             var soundlines = entities.sound_line.Where(sl => sl.id_project == id_project).ToList();
             if (soundlines.Count == 0)
-                return new HttpResponseMessage(HttpStatusCode.NotFound);
-            string result = String.Empty;
+                return NotFound();
+
+            StringBuilder result = new StringBuilder();
             foreach (var txt in soundlines)
             {
-                result += txt.task_answer;
+                result.Append(soundlines);
             }
-            response.Content = new StringContent(result, System.Text.Encoding.UTF8, "text/plain");
-            return response;
+            return Ok(new StringContent(result.ToString(), System.Text.Encoding.UTF8, "text/plain"));
         }
+
+        /// <summary>
+        /// Recuperer l'etat du projet
+        /// </summary>
+        /// <param name="id_project"></param>
+        /// <param name="guidElements"></param>
+        /// <returns></returns>
         [HttpGet]
         [Route("v1/Project/GetStateProject")]
         public IHttpActionResult GetStateProject(int id_project, string guidElements)
@@ -106,7 +123,12 @@ namespace DictaFoule.API.Controllers
             return Ok(project.state);
         }
 
-        
+        /// <summary>
+        /// Recuperer l'id du projet
+        /// </summary>
+        /// <param name="nameFile"></param>
+        /// <param name="guidElements"></param>
+        /// <returns></returns>
         [HttpGet]
         [Route("v1/Project/GetIdProject")]
         public IHttpActionResult GetIdProject(string nameFile, string guidElements)
@@ -122,13 +144,15 @@ namespace DictaFoule.API.Controllers
                 return Ok(project.FirstOrDefault().id);
         }
 
-        
+        /// <summary>
+        /// Envoyer un mail à l'utilisateur avec la transcription
+        /// </summary>
+        /// <param name="emailModel"></param>
+        /// <returns></returns>
         [HttpPost]
         [Route("v1/Project/SendEmail")]
-        public async System.Threading.Tasks.Task<IHttpActionResult> SendEmail(Object model)
+        public async System.Threading.Tasks.Task<IHttpActionResult> SendEmail(SendEmailModel emailModel)
         {
-            var jsonmodel = model.ToString();
-            var emailModel = JsonConvert.DeserializeObject<SendEmailModel>(jsonmodel);
             var user = entities.users.Where(u => u.guid == emailModel.GuidElements).ToList();
             if (user.Count == 0)
                 return NotFound();
@@ -172,6 +196,11 @@ namespace DictaFoule.API.Controllers
             }
         }
 
+        /// <summary>
+        /// Payer pour la transcription
+        /// </summary>
+        /// <param name="paymentModel"></param>
+        /// <returns></returns>
         [HttpPost]
         [Route("v1/Project/Payment")]
         public IHttpActionResult Payement(PaymentModel paymentModel)
