@@ -1,23 +1,22 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <Project DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003" ToolsVersion="4.0">
-  <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
   <PropertyGroup>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
-    <Name>DictaFoule.Db</Name>
+    <Name>Dictafoule.Db</Name>
     <SchemaVersion>2.0</SchemaVersion>
     <ProjectVersion>4.1</ProjectVersion>
-    <ProjectGuid>{3cb218ed-b1e1-4496-8072-6f59425d52ee}</ProjectGuid>
-    <DSP>Microsoft.Data.Tools.Schema.Sql.SqlAzureDatabaseSchemaProvider</DSP>
+    <ProjectGuid>{c84e80c0-7035-4ec9-9c09-aa3e2d551dd4}</ProjectGuid>
+    <DSP>Microsoft.Data.Tools.Schema.Sql.Sql130DatabaseSchemaProvider</DSP>
     <OutputType>Database</OutputType>
     <RootPath>
     </RootPath>
-    <RootNamespace>DictaFoule.Db</RootNamespace>
-    <AssemblyName>DictaFoule.Db</AssemblyName>
+    <RootNamespace>Dictafoule.Db</RootNamespace>
+    <AssemblyName>Dictafoule.Db</AssemblyName>
     <ModelCollation>1033, CI</ModelCollation>
     <DefaultFileStructure>BySchemaAndSchemaType</DefaultFileStructure>
     <DeployToDatabase>True</DeployToDatabase>
-    <TargetFrameworkVersion>v4.5.2</TargetFrameworkVersion>
+    <TargetFrameworkVersion>v4.5</TargetFrameworkVersion>
     <TargetLanguage>CS</TargetLanguage>
     <AppDesignerFolder>Properties</AppDesignerFolder>
     <SqlServerVerification>False</SqlServerVerification>
@@ -57,21 +56,5 @@
   <Import Condition="'$(SQLDBExtensionsRefPath)' == ''" Project="$(MSBuildExtensionsPath)\Microsoft\VisualStudio\v$(VisualStudioVersion)\SSDT\Microsoft.Data.Tools.Schema.SqlTasks.targets" />
   <ItemGroup>
     <Folder Include="Properties" />
-    <Folder Include="dbo" />
-    <Folder Include="dbo\Tables" />
-    <Folder Include="publish\" />
-  </ItemGroup>
-  <ItemGroup>
-    <Build Include="dbo\Tables\user.sql" />
-    <Build Include="dbo\Tables\project.sql" />
-    <Build Include="dbo\Tables\sound_line.sql" />
-    <Build Include="dbo\Tables\log.sql" />
-    <Build Include="dbo\Tables\order.sql" />
-  </ItemGroup>
-  <ItemGroup>
-    <None Include="publish\SoYouStart.DictaFoule.Db.publish.xml" />
-  </ItemGroup>
-  <ItemGroup>
-    <RefactorLog Include="DictaFoule.Db.refactorlog" />
   </ItemGroup>
 </Project>
