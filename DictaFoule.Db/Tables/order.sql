@@ -1,4 +1,4 @@
-﻿CREATE TABLE [dbo].[order]
+﻿CREATE TABLE [order]
 (
 	[id_payment] INT            IDENTITY (1, 1) NOT NULL, 
     [id_stripe] VARCHAR(MAX) NOT NULL, 

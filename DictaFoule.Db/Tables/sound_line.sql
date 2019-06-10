@@ -1,4 +1,4 @@
-﻿CREATE TABLE [dbo].[sound_line]
+﻿CREATE TABLE [sound_line]
 (
     [id]               INT            IDENTITY (1, 1) NOT NULL,
     [id_project] INT NOT NULL, 

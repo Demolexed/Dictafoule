@@ -1,4 +1,4 @@
-﻿CREATE TABLE [dbo].[log]
+﻿CREATE TABLE [log]
 (
 	[id_log]       INT      IDENTITY (1, 1) NOT NULL,
 	[id_log_level]       INT NOT NULL,

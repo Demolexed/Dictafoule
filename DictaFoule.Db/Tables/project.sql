@@ -1,4 +1,4 @@
-﻿CREATE TABLE [dbo].[project]
+﻿CREATE TABLE [project]
 (
 	[id]               INT            IDENTITY (1, 1) NOT NULL,
     [import_sound_file_name] VARCHAR(MAX) NOT NULL, 

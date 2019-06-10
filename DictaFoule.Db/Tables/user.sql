@@ -1,4 +1,4 @@
-﻿CREATE TABLE [dbo].[user]
+﻿CREATE TABLE [user]
 (
 	[id]    INT            IDENTITY (1, 1) NOT NULL,
     [email] NVARCHAR(MAX) NULL,
