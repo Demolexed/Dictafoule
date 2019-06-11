@@ -21,12 +21,13 @@ namespace Dictafoule.Api.Test
             userController = new UserController();
         }
 
+        [TestCase("1a0c42b8-5465-4dbe-8660-45e22d8d38cd")]
         [Test]
-        public void CreateUserShouldReturnOK()
+        public void CreateUserShouldReturnOK(string guid)
         {
             var userModel = new UserModel()
             {
-                Guid = "1a0c42b8-5465-4dbe-8660-45e22d8d38cd"
+                Guid = guid
             };
             var response = userController.CreateUser(userModel);
             Assert.IsInstanceOf<OkResult>(response, "La reponse n'est pas du type OkResult");
