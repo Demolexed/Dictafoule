@@ -24,6 +24,10 @@ namespace DictaFoule.Mobile.iOS
 
         [Outlet]
         [GeneratedCode ("iOS Designer", "1.0")]
+        UIKit.UILabel ErrorTxt { get; set; }
+
+        [Outlet]
+        [GeneratedCode ("iOS Designer", "1.0")]
         UIKit.UIButton ExportBtn { get; set; }
 
         [Outlet]
@@ -36,7 +40,7 @@ namespace DictaFoule.Mobile.iOS
 
         [Outlet]
         [GeneratedCode ("iOS Designer", "1.0")]
-        UIKit.UIButton PlayBtn { get; set; }
+        UIKit.UIButton PlayerBtn { get; set; }
 
         [Outlet]
         [GeneratedCode ("iOS Designer", "1.0")]
@@ -62,9 +66,9 @@ namespace DictaFoule.Mobile.iOS
         [GeneratedCode ("iOS Designer", "1.0")]
         partial void ExportBtn_TouchUpInside (UIKit.UIButton sender);
 
-        [Action ("PlayBtn_TouchUpInside:")]
+        [Action ("PlayerBtn_TouchUpInside:")]
         [GeneratedCode ("iOS Designer", "1.0")]
-        partial void PlayBtn_TouchUpInside (UIKit.UIButton sender);
+        partial void PlayerBtn_TouchUpInside (UIKit.UIButton sender);
 
         void ReleaseDesignerOutlets ()
         {
@@ -76,6 +80,11 @@ namespace DictaFoule.Mobile.iOS
             if (AskTranscrib != null) {
                 AskTranscrib.Dispose ();
                 AskTranscrib = null;
+            }
+
+            if (ErrorTxt != null) {
+                ErrorTxt.Dispose ();
+                ErrorTxt = null;
             }
 
             if (ExportBtn != null) {
@@ -93,9 +102,9 @@ namespace DictaFoule.Mobile.iOS
                 OptionBtn = null;
             }
 
-            if (PlayBtn != null) {
-                PlayBtn.Dispose ();
-                PlayBtn = null;
+            if (PlayerBtn != null) {
+                PlayerBtn.Dispose ();
+                PlayerBtn = null;
             }
 
             if (SliderTime != null) {

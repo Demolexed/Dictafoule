@@ -8,6 +8,10 @@ using CoreAnimation;
 using AVFoundation;
 using System.IO;
 using System.Diagnostics;
+using System.Net;
+using DictaFoule.Mobile.iOS.API;
+using System.Threading.Tasks;
+using DictaFoule.Mobile.iOS.Business;
 
 namespace DictaFoule.Mobile.iOS
 {
@@ -28,7 +32,8 @@ namespace DictaFoule.Mobile.iOS
         public string fileName;
 
         UITableView TableRecordView;
-        List<TableItem> TableItems = new List<TableItem>();
+
+        User User { get; set; }
 
 
             public ViewcController(IntPtr handle) : base(handle)
@@ -42,27 +47,12 @@ namespace DictaFoule.Mobile.iOS
 
             NameFile.Text = "Nouvel Enregistrement";
 
-            CGColor[] colorsOrange = { new UIColor(red: 0.97f, green: 0.56f, blue: 0.37f, alpha: 1.0f).CGColor,
-                new UIColor(red: 0.95f, green: 0.74f, blue: 0.43f, alpha: 1.0f).CGColor};
-            CAGradientLayer gradientLayerOrange = new CAGradientLayer
-            {
-                Colors = colorsOrange,
-                Transform = CATransform3D.MakeRotation((System.nfloat)(-Math.PI / 2), 0, 0, 1),
-                Frame = new CGRect(0, 0, View.Bounds.Height, View.Bounds.Width)
-            };
-            this.View.Layer.InsertSublayer(gradientLayerOrange, 0);
 
-            CGColor[] colorsBlue = { new UIColor(red: 0.29f, green: 0.26f, blue: 0.96f, alpha: 1.0f).CGColor,
-                new UIColor(red: 0.47f, green: 0.40f, blue: 0.96f, alpha: 1.0f).CGColor};
-            CAGradientLayer gradientLayerBlue = new CAGradientLayer
-            {
-                Colors = colorsBlue,
-                Transform = CATransform3D.MakeRotation((System.nfloat)(-Math.PI / 2), 0, 0, 1),
-                Frame = new CGRect(0, 320, View.Bounds.Height, View.Bounds.Width)
-            };
-            this.View.Layer.InsertSublayer(gradientLayerBlue, 1);
 
             Playbtn.SetBackgroundImage(UIImage.FromBundle("PlayIcon"), UIControlState.Normal);
+            Playbtn.SetBackgroundImage(UIImage.FromFile("PlayDisableButton.png"), UIControlState.Disabled);
+            Playbtn.Enabled = false;
+
 
             time = TimeSpan.Zero;
             timer.Interval = 1000;
@@ -71,22 +61,41 @@ namespace DictaFoule.Mobile.iOS
             playTimer.Interval = 1000; //one second  
             playTimer.Elapsed += UpdateSliderTime;
 
+            CGColor[] colorsOrange = { new UIColor(red: 0.97f, green: 0.56f, blue: 0.37f, alpha: 1.0f).CGColor,
+                new UIColor(red: 0.95f, green: 0.74f, blue: 0.43f, alpha: 1.0f).CGColor};
+            CAGradientLayer gradientLayerOrange = new CAGradientLayer
+            {
+                Colors = colorsOrange,
+                Transform = CATransform3D.MakeRotation((System.nfloat)(-Math.PI / 2), 0, 0, 1),
+                Frame = new CGRect(0, 0, View.Bounds.Width, View.Bounds.Height * 0.5)
+            };
+            this.View.Layer.InsertSublayer(gradientLayerOrange, 0);
 
 
-            TableRecordView = new UITableView(new CGRect(0, 450, View.Bounds.Width, View.Bounds.Height));
-            //TableItems.Add(new TableItem("Nouvel enregistrement") { Date = DateTime.Now.ToString("dd/MM") + " - ", Time = time.ToString(@"hh\:mm\:ss") });
-            GetFiles();
-            TableRecordView.Source = new TableSource(TableItems, this);
+            CGColor[] colorsBlue = { new UIColor(red: 0.29f, green: 0.26f, blue: 0.96f, alpha: 1.0f).CGColor,
+                new UIColor(red: 0.47f, green: 0.40f, blue: 0.96f, alpha: 1.0f).CGColor}; CAGradientLayer gradientLayerBlue = new CAGradientLayer
+                {
+                    Colors = colorsBlue,
+                    Transform = CATransform3D.MakeRotation((System.nfloat)(-Math.PI / 2), 0, 0, 1),
+                Frame = new CGRect(0, gradientLayerOrange.Frame.Height, View.Bounds.Width, gradientLayerOrange.Frame.Height * 0.4)
+                };
+            this.View.Layer.InsertSublayer(gradientLayerBlue, 1);
+
+
+
+            TableRecordView = new UITableView(new CGRect(0, gradientLayerBlue.Frame.Y + gradientLayerBlue.Frame.Height, View.Bounds.Width, gradientLayerOrange.Frame.Height * 0.60));
+
+            this.User = new User();
+            TableRecordView.Source = new TableSource(User.Sounds, this);
+            TableRecordView.ScrollEnabled = true;
             Add(TableRecordView);
-
-           
-            
-
+          
         }
 
         public override void ViewWillAppear(bool animated)
         {
             base.ViewWillAppear(animated);
+
             TableRecordView.RowHeight = UITableView.AutomaticDimension;
             TableRecordView.EstimatedRowHeight = 40f;
             TableRecordView.ReloadData();
@@ -96,7 +105,15 @@ namespace DictaFoule.Mobile.iOS
         bool PrepareAudioRecording()
         {
             var audioSession = AVAudioSession.SharedInstance();
-            var err = audioSession.SetCategory(AVAudioSessionCategory.PlayAndRecord);
+            var err = audioSession.SetCategory(AVAudioSessionCategory.Record);
+
+            if (audioSession.RecordPermission == AVAudioSessionRecordPermission.Denied)
+            {
+                var erreurAlertController = UIAlertController.Create("Erreur", "Le micro est desactivé", UIAlertControllerStyle.Alert);
+                erreurAlertController.AddAction(UIAlertAction.Create("OK", UIAlertActionStyle.Default, null));
+                PresentViewController(erreurAlertController, true,null);
+                return false;
+            }
             if (err != null)
             {
                 Console.WriteLine("audioSession: {0}", err);
@@ -150,9 +167,11 @@ namespace DictaFoule.Mobile.iOS
 
         partial void RecordButton_TouchUpInside(UIButton sender)
         {
+
             if (recorder == null)
             {
-                AudioToolbox.AudioSession.Category = AudioToolbox.AudioSessionCategory.RecordAudio;
+                AudioToolbox.AudioSession.Category = AudioToolbox.AudioSessionCategory.PlayAndRecord;
+
                 AudioToolbox.AudioSession.SetActive(true);
                 if (!PrepareAudioRecording())
                 {
@@ -164,24 +183,26 @@ namespace DictaFoule.Mobile.iOS
             {
                 RecordButton.SetBackgroundImage(UIImage.FromBundle("EndRecord"), UIControlState.Normal);
                 OkBtn.Enabled = false;
+                Playbtn.Enabled = false;
                 timer.Enabled = true;
                 timer.Start();
-
                 recorder.Record();
+                UIApplication.SharedApplication.IdleTimerDisabled = true;
             }
             else
             {
                 timer.Enabled = false;
                 timer.Stop();
                 OkBtn.Enabled = true;
-                RecordButton.SetBackgroundImage(UIImage.FromFile("BeginRecord.png"), UIControlState.Normal);
+                Playbtn.Enabled = true;
+                RecordButton.SetBackgroundImage(UIImage.FromFile("Reccord_Off.png"), UIControlState.Normal);
                 recorder.Stop();
+                UIApplication.SharedApplication.IdleTimerDisabled = false;
             }
         }
 
         private void Timer_Elapsed(object sender, ElapsedEventArgs e)
         {
-            DateTime myDate = DateTime.Now;
             time = time.Add(TimeSpan.FromSeconds(1));
             InvokeOnMainThread(() =>
             {
@@ -194,10 +215,8 @@ namespace DictaFoule.Mobile.iOS
         {
             if (recorder == null)
                 return;
-            //recorder.Stop();
             this.View.BackgroundColor = UIColor.Gray;
             CustomPopUpView cpuv = new CustomPopUpView(new CoreGraphics.CGSize(300, 175), "NOM DU FICHIER*", "SaveButton.png", "EraseFile.png", this);
-            //Transcribe(cpuv.SaveFile.Text);
             recorder.Dispose();
             recorder = null;
 
@@ -205,19 +224,20 @@ namespace DictaFoule.Mobile.iOS
 
         public void Transcribe()
         {
-            //var storyBoard = UIStoryboard.FromName("Main", null);
-            //var payementController = Storyboard.InstantiateViewController("PayementController") as PayementController;
-            //var navigationController = new UINavigationController();
-            //navigationController.PushViewController(payementController, true);
             var payementController = this.Storyboard.InstantiateViewController("PayementController") as PayementController;
             this.NavigationController.PushViewController(payementController, true);
-            //tableItems.Add(nameFile + " - En cours");
-            //TableRecordView.Source = new TableSource(tableItems, this);
             string path = Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments);
             string audioFilePath = Path.Combine(path, fileName);
             pathfile = NSUrl.FromFilename(audioFilePath);
-            TableItems.Add(new TableItem(fileName) { Date = DateTime.Now.ToString("dd/MM") + " - ", Time = time.ToString(@"hh\:mm\:ss"), Pathfile = pathfile });
-            payementController.SetItem(TableItems[TableItems.Count - 1]);
+
+            var sound = new Sound(fileName) 
+            { 
+                Date = DateTime.Now.ToString("dd/MM") + " - ", 
+                Time = time.ToString(@"hh\:mm\:ss"), 
+                Pathfile = pathfile
+            };
+            payementController.SetItem(sound);
+            User.Sounds.Add(sound);
             Add(TableRecordView);
             InvokeOnMainThread(delegate { TableRecordView.ReloadData(); time = TimeSpan.Zero; TimerLbl.Text = time.ToString("t"); });
         }
@@ -226,14 +246,30 @@ namespace DictaFoule.Mobile.iOS
         {
             if (nameFile.Length <= 0)
                 nameFile = DateTime.Now.ToString();
-            TableItems.Add(new TableItem(nameFile) { Date = DateTime.Now.ToString("dd/MM")  + " - ", Time = time.ToString(@"hh\:mm\:ss") });
-            TableRecordView.Source = new TableSource(TableItems, this);
+            User.Sounds.Add(new Sound(nameFile) { Date = DateTime.Now.ToString("dd/MM")  + " - ", Time = time.ToString(@"hh\:mm\:ss") });
+            TableRecordView.Source = new TableSource(User.Sounds, this);
             Add(TableRecordView);
             InvokeOnMainThread(delegate { TableRecordView.ReloadData(); });
         }
 
         partial void Playbtn_TouchUpInside(UIButton sender)
         {
+            if (player?.IsPlaying() == false && player.IsFinish == false)
+            {
+                playTimer.Enabled = true;
+                playTimer.Start();
+                player.Play();
+                Playbtn.SetBackgroundImage(UIImage.FromBundle("PauseIcon"), UIControlState.Normal);
+                return;
+            }
+            if (player?.IsPlaying() == true)
+            {
+                playTimer.Enabled = false;
+                playTimer.Stop();
+                player.Pause();
+                Playbtn.SetBackgroundImage(UIImage.FromBundle("PlayIcon"), UIControlState.Normal);
+                return;
+            }
             try
             {
                 player = new GameAudioManager();
@@ -245,6 +281,8 @@ namespace DictaFoule.Mobile.iOS
 
                 SliderTime.MinValue = 0;
                 SliderTime.MaxValue = (float)(int)player.Duration();
+                Playbtn.SetBackgroundImage(UIImage.FromBundle("PauseIcon"), UIControlState.Normal);
+
             }
             catch (Exception ex)
             {
@@ -267,19 +305,8 @@ namespace DictaFoule.Mobile.iOS
                 InvokeOnMainThread(delegate
                 {
                     SliderTime.Value = SliderTime.MinValue;
+                    Playbtn.SetBackgroundImage(UIImage.FromBundle("PlayIcon"), UIControlState.Normal);
                 });
-            }
-        }
-
-        private void GetFiles()
-        {
-            var path = Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments);
-            var files = System.IO.Directory.GetFiles(path);
-            foreach (var file in files)
-            {
-                var audiopathfile = NSUrl.FromFilename(file);
-                var filename = Path.GetFileName(file);
-                TableItems.Add(new TableItem(filename) { Date = DateTime.Now.ToString("dd/MM") + " - ", Time = time.ToString(@"hh\:mm\:ss"), Pathfile = audiopathfile });
             }
         }
 

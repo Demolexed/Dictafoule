@@ -5,6 +5,10 @@ using CoreGraphics;
 using CoreAnimation;
 using AVFoundation;
 using System.Timers;
+using System.Net;
+using System.IO;
+using DictaFoule.Mobile.iOS.API;
+using System.Threading.Tasks;
 
 namespace DictaFoule.Mobile.iOS
 {
@@ -12,7 +16,7 @@ namespace DictaFoule.Mobile.iOS
     {
 
         public int index;
-        public TableItem Item;
+        public Sound Item { get; set; }
 
         public TimeSpan time = new TimeSpan();
         Timer playTimer = new Timer();
@@ -31,24 +35,21 @@ namespace DictaFoule.Mobile.iOS
         {
         }
 
-        public DetailViewController(int index)
-        {
-        }
 
         public override void ViewDidLoad()
         {
             base.ViewDidLoad();
-            CGColor[] colorsOrange = new CGColor[] { new UIColor(red: 0.97f, green: 0.56f, blue: 0.37f, alpha: 1.0f).CGColor,
+            CGColor[] colorsOrange = { new UIColor(red: 0.97f, green: 0.56f, blue: 0.37f, alpha: 1.0f).CGColor,
                 new UIColor(red: 0.95f, green: 0.74f, blue: 0.43f, alpha: 1.0f).CGColor};
             CAGradientLayer gradientLayerOrange = new CAGradientLayer
             {
                 Colors = colorsOrange,
                 Transform = CATransform3D.MakeRotation((System.nfloat)(-Math.PI / 2), 0, 0, 1),
-                Frame = new CGRect(0, 0, View.Bounds.Height, View.Bounds.Width - 200)
+                Frame = new CGRect(0, 0, View.Bounds.Height, TranscriptionTxt.Frame.Y)
             };
             this.View.Layer.InsertSublayer(gradientLayerOrange, 0);
 
-            PlayBtn.SetBackgroundImage(UIImage.FromBundle("PlayIcon"), UIControlState.Normal);
+            PlayerBtn.SetBackgroundImage(UIImage.FromBundle("PlayIcon"), UIControlState.Normal);
 
             time = TimeSpan.Zero;
             playTimer.Interval = 1000;
@@ -58,6 +59,7 @@ namespace DictaFoule.Mobile.iOS
             timer.Interval = 1000;
             timer.Elapsed += Timer_Elapsed;
 
+            ErrorTxt.Hidden = true;
             ActivityIndicartorTranscrib.Hidden = true;
             WaitTranscribTxT.Hidden = true;
             TranscriptionTxt.Hidden = true;
@@ -65,87 +67,110 @@ namespace DictaFoule.Mobile.iOS
             OptionBtn.Hidden = true;
             ExportBtn.Hidden = true;
 
+            Item.Update();
+
         }
 
         public override void ViewWillAppear(bool animated)
         {
             base.ViewWillAppear(animated);
             NameRecordTxt.Text = Item.Name;
-            if (Item.Transcribed == 0)
+            if (Item.State == Business.SoundState.New)
                 AskTranscrib.Hidden = false;
-            if (Item.Transcribed == 10)
+            if (Item.IsWaiting)
             {
                 AskTranscrib.Hidden = true;
                 ActivityIndicartorTranscrib.Hidden = false;
+                ActivityIndicartorTranscrib.StartAnimating();
                 WaitTranscribTxT.Hidden = false;
             }
-            if (Item.Transcribed == 20)
+            if (Item.State == Business.SoundState.ProjectCompleted)
             {
-                ActivityIndicartorTranscrib.Hidden = true;
-                WaitTranscribTxT.Hidden = true;
+                Item.GetTranscriptProject(UIDevice.CurrentDevice.IdentifierForVendor.AsString());
                 TranscriptionTxt.Hidden = false;
-
-            }
-            if (Item.Transcribed == 30)
-            {
-                TranscriptionTxt.Hidden = false;
+                TranscriptionTxt.Text = Item.Transcription;
                 OptionBtn.Hidden = false;
                 ExportBtn.Hidden = false;
-            }   
+                ActivityIndicartorTranscrib.Hidden = true;
+                ActivityIndicartorTranscrib.StopAnimating();
+                WaitTranscribTxT.Hidden = true;
+            }
+            if (Item.IsError)
+                ErrorTxt.Hidden = false;
         }
 
-        public void SetItem(TableItem item)
+        public void SetItem(Sound item)
         {
             Item = item;
         }
 
         partial void ExportBtn_TouchUpInside(UIButton sender)
         {
-            this.View.BackgroundColor = UIColor.Gray;
-            //CustomPopUpView cpuv = new CustomPopUpView(new CoreGraphics.CGSize(300, 175), "EMAIL*", "SendButton.png", "CancelButton.png");
-            //cpuv.PopUp();
+            PopUpViewEmail cpuv = new PopUpViewEmail(new CoreGraphics.CGSize(300, 175), "EMAIL*", "SendButton.png", "CancelButton.png", this);
         }
 
-        partial void PlayBtn_TouchUpInside(UIButton sender)
+        partial void PlayerBtn_TouchUpInside(UIButton sender)
         {
-            /* ActivityIndicartorTranscrib.Hidden = true;
-            WaitTranscribTxT.Hidden = true;
-            TranscriptionTxt.Hidden = false;
-            ExportBtn.Hidden = false;
-            OptionBtn.Hidden = false;
-            Item.Transcribed = 30; */
-
-            try
+            if (player?.IsPlaying() == false && player.IsFinish == false)
             {
-                player = new GameAudioManager();
                 playTimer.Enabled = true;
                 timer.Enabled = true;
                 playTimer.Start();
-                timer.Start();
-
-                player.PlaySound(Item.Pathfile);
-
-                SliderTime.MinValue = 0;
-                SliderTime.MaxValue = (float)(int)player.Duration();
+                player.Play();
+                PlayerBtn.SetBackgroundImage(UIImage.FromBundle("PauseIcon"), UIControlState.Normal);
+                return;
             }
-            catch (Exception ex)
+            if (player?.IsPlaying() == true)
             {
-                Console.WriteLine(ex.Message);
+                playTimer.Enabled = true;
+                timer.Enabled = true;
+                timer.Stop();
+                playTimer.Stop();
+                player.Pause();
+                PlayerBtn.SetBackgroundImage(UIImage.FromBundle("PlayIcon"), UIControlState.Normal);
+                return;
             }
 
+            else
+            {
+                try
+                {
+                    player = new GameAudioManager();
+                    playTimer.Enabled = true;
+                    timer.Enabled = true;
+                    playTimer.Start();
+                    timer.Start();
+                    player.PlaySound(Item.Pathfile);
+
+                    SliderTime.MinValue = 0;
+                    SliderTime.MaxValue = (float)(int)player.Duration();
+                    PlayerBtn.SetBackgroundImage(UIImage.FromBundle("PauseIcon"), UIControlState.Normal);
+                }
+                catch (Exception)
+                {
+                    UIAlertController alert = UIAlertController.Create("Erreur", "Impossible de lire votre fichier", UIAlertControllerStyle.Alert);
+                    alert.AddAction(UIAlertAction.Create("OK", UIAlertActionStyle.Default, (action) => { }));
+                    PresentViewController(alert, true, null);
+
+                }
+            }
         }
 
         partial void AskTranscrib_TouchUpInside(UIButton sender)
         {
+            if(player != null)
+                player.Dispose();
+
             var payementController = this.Storyboard.InstantiateViewController("PayementController") as PayementController;
             this.NavigationController.PushViewController(payementController, true);
             payementController.SetItem(Item);
         }
 
-        private void UpdateSliderTime(object sender, ElapsedEventArgs e)
+        void UpdateSliderTime(object sender, ElapsedEventArgs e)
         {
             if (player.IsPlaying())
-                InvokeOnMainThread(delegate {
+                InvokeOnMainThread(delegate
+                {
                     SliderTime.Value += 1;
                 });
             else
@@ -159,11 +184,12 @@ namespace DictaFoule.Mobile.iOS
                     SliderTime.Value = SliderTime.MinValue;
                     time = TimeSpan.Zero;
                     TimerTxt.Text = time.ToString("t");
+                    PlayerBtn.SetBackgroundImage(UIImage.FromBundle("PlayIcon"), UIControlState.Normal);
                 });
             }
         }
 
-void Timer_Elapsed(object sender, ElapsedEventArgs e)
+        void Timer_Elapsed(object sender, ElapsedEventArgs e)
         {
             time = time.Add(TimeSpan.FromSeconds(1));
             InvokeOnMainThread(() =>

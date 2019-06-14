@@ -1,6 +1,5 @@
 ﻿using System;
 using System.IO;
-using System.Threading.Tasks;
 using CoreGraphics;
 using UIKit;
 
@@ -8,11 +7,7 @@ namespace DictaFoule.Mobile.iOS
 {
     public class CustomPopUpView : UIView
     {
-        public enum MessageResult
-        {
-            OK = 1,
-            CANCEL = 2,
-        }
+
         public delegate void PopWillCloseHandler();
         public event PopWillCloseHandler PopWillClose;
 

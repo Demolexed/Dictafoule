@@ -22,10 +22,11 @@ namespace DictaFoule.Mobile.iOS
         }
 
         public bool MusicOn { get; set; } = true;
-        public float MusicVolume { get; set; } = 0.5f;
+        public float MusicVolume { get; set; } = 1.0f;
 
         public bool EffectsOn { get; set; } = true;
         public float EffectsVolume { get; set; } = 1.0f;
+        public bool IsFinish { get; set; }
         #endregion
 
         #region Constructors
@@ -34,6 +35,7 @@ namespace DictaFoule.Mobile.iOS
             // Initialize
             ActivateAudioSession();
         }
+
         #endregion
 
         #region Public Methods
@@ -144,6 +146,7 @@ namespace DictaFoule.Mobile.iOS
             soundEffect = new AVAudioPlayer(songURL, "wav", out err);
             soundEffect.Volume = EffectsVolume;
             soundEffect.FinishedPlaying += delegate {
+                IsFinish = true;
                 soundEffect = null;
             };
             soundEffect.NumberOfLoops = 0;
@@ -173,6 +176,22 @@ namespace DictaFoule.Mobile.iOS
         public void PlayCurrentTime(double time)
         {
             soundEffect.PlayAtTime(time);
+        }
+
+        public void Pause()
+        {
+            soundEffect.Pause();
+        }
+
+        public void Play()
+        {
+            soundEffect.Play();
+        }
+
+        public void Dispose()
+        {
+            soundEffect.Stop();
+            soundEffect.Dispose();
         }
         #endregion
     }

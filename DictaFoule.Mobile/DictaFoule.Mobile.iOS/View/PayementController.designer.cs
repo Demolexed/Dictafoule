@@ -20,7 +20,19 @@ namespace DictaFoule.Mobile.iOS
 
         [Outlet]
         [GeneratedCode ("iOS Designer", "1.0")]
-        UIKit.UITextField CVTxt { get; set; }
+        UIKit.UITextField cardExpMonth { get; set; }
+
+        [Outlet]
+        [GeneratedCode ("iOS Designer", "1.0")]
+        UIKit.UITextField cardExpYear { get; set; }
+
+        [Outlet]
+        [GeneratedCode ("iOS Designer", "1.0")]
+        UIKit.UITextField CVCTxt { get; set; }
+
+        [Outlet]
+        [GeneratedCode ("iOS Designer", "1.0")]
+        UIKit.UIVisualEffectView EffectViewBlur { get; set; }
 
         [Outlet]
         [GeneratedCode ("iOS Designer", "1.0")]
@@ -28,11 +40,11 @@ namespace DictaFoule.Mobile.iOS
 
         [Outlet]
         [GeneratedCode ("iOS Designer", "1.0")]
-        UIKit.UITextField ExpiratationDateTxt { get; set; }
+        UIKit.UILabel MgsError { get; set; }
 
         [Outlet]
         [GeneratedCode ("iOS Designer", "1.0")]
-        UIKit.UITextField FirstNameTxt { get; set; }
+        UIKit.UITextField NameTxt { get; set; }
 
         [Outlet]
         [GeneratedCode ("iOS Designer", "1.0")]
@@ -44,11 +56,15 @@ namespace DictaFoule.Mobile.iOS
 
         [Outlet]
         [GeneratedCode ("iOS Designer", "1.0")]
-        UIKit.UILabel PriceTxt { get; set; }
+        UIKit.UILabel PriceLbl { get; set; }
 
         [Outlet]
         [GeneratedCode ("iOS Designer", "1.0")]
         UIKit.UILabel TimeTranscriptionTxt { get; set; }
+
+        [Outlet]
+        [GeneratedCode ("iOS Designer", "1.0")]
+        UIKit.UIActivityIndicatorView WaitPayement { get; set; }
 
         [Action ("CancelBtn_TouchUpInside:")]
         [GeneratedCode ("iOS Designer", "1.0")]
@@ -65,9 +81,24 @@ namespace DictaFoule.Mobile.iOS
                 CancelBtn = null;
             }
 
-            if (CVTxt != null) {
-                CVTxt.Dispose ();
-                CVTxt = null;
+            if (cardExpMonth != null) {
+                cardExpMonth.Dispose ();
+                cardExpMonth = null;
+            }
+
+            if (cardExpYear != null) {
+                cardExpYear.Dispose ();
+                cardExpYear = null;
+            }
+
+            if (CVCTxt != null) {
+                CVCTxt.Dispose ();
+                CVCTxt = null;
+            }
+
+            if (EffectViewBlur != null) {
+                EffectViewBlur.Dispose ();
+                EffectViewBlur = null;
             }
 
             if (EmailTxt != null) {
@@ -75,14 +106,14 @@ namespace DictaFoule.Mobile.iOS
                 EmailTxt = null;
             }
 
-            if (ExpiratationDateTxt != null) {
-                ExpiratationDateTxt.Dispose ();
-                ExpiratationDateTxt = null;
+            if (MgsError != null) {
+                MgsError.Dispose ();
+                MgsError = null;
             }
 
-            if (FirstNameTxt != null) {
-                FirstNameTxt.Dispose ();
-                FirstNameTxt = null;
+            if (NameTxt != null) {
+                NameTxt.Dispose ();
+                NameTxt = null;
             }
 
             if (NbCbTxt != null) {
@@ -95,14 +126,19 @@ namespace DictaFoule.Mobile.iOS
                 PayBtn = null;
             }
 
-            if (PriceTxt != null) {
-                PriceTxt.Dispose ();
-                PriceTxt = null;
+            if (PriceLbl != null) {
+                PriceLbl.Dispose ();
+                PriceLbl = null;
             }
 
             if (TimeTranscriptionTxt != null) {
                 TimeTranscriptionTxt.Dispose ();
                 TimeTranscriptionTxt = null;
+            }
+
+            if (WaitPayement != null) {
+                WaitPayement.Dispose ();
+                WaitPayement = null;
             }
         }
     }
