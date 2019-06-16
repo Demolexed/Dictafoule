@@ -6,10 +6,10 @@ using System.Web.Http;
 
 namespace DictaFoule.API.Controllers
 {
-    public class HealthCheckController : ApiController
+    public class HealthCheckController : BaseController
     {
         [HttpGet]
-        [Route("v1/Project/HealthChecking")]
+        [Route("v1/HealthCheck/HealthChecking")]
         public IHttpActionResult HealthChecking()
         {
             return Ok();

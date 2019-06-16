@@ -35,7 +35,6 @@ Project("{00D1A9C2-B5F0-4AF3-8072-F6C62B433612}") = "Dictafoule.Db", "Dictafoule
 EndProject
 Global
 	GlobalSection(SharedMSBuildProjectFiles) = preSolution
-		DictaFoule.Mobile\DictaFoule.Mobile\DictaFoule.Mobile.projitems*{7c5f116a-9f97-4c75-a75a-e6dc48c3d968}*SharedItemsImports = 4
 		DictaFoule.Mobile\DictaFoule.Mobile\DictaFoule.Mobile.projitems*{a721f12f-fef0-4f6b-9353-65168a26f5a7}*SharedItemsImports = 13
 		DictaFoule.Mobile\DictaFoule.Mobile\DictaFoule.Mobile.projitems*{ac402422-5b5b-49c3-9581-c8b3021c6056}*SharedItemsImports = 4
 	EndGlobalSection
