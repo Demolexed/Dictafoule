@@ -40,7 +40,7 @@ namespace DictaFoule.Mobile.iOS
             }
             catch (RequestException ex)
             {
-                
+                this.IdProject = 0;
             }
 
         }
@@ -54,7 +54,7 @@ namespace DictaFoule.Mobile.iOS
             }
             catch(RequestException ex)
             {
-
+                this.State = SoundState.New;
             }
             
         }
