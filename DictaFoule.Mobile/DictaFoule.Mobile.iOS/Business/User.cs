@@ -47,7 +47,7 @@ namespace DictaFoule.Mobile.iOS.Business
         public async void GetUser()
         {
 
-            var response = await clientService.GetService("User/GetUser?guidElements=" + this.Guid);
+            var response = await clientService.GetService<string>("User/GetUser?guidElements=" + this.Guid);
         }
 
         public async void CreateUser()
@@ -59,7 +59,7 @@ namespace DictaFoule.Mobile.iOS.Business
             };
 
             var query = JsonConvert.SerializeObject(userModel);
-            await this.clientService.PostService("User/CreateUser", new StringContent(query, Encoding.Unicode, "application/json"));
+            await this.clientService.PostService<bool>("User/CreateUser", new StringContent(query, Encoding.Unicode, "application/json"));
         }
 
         public void GetFiles()

@@ -33,19 +33,35 @@ namespace DictaFoule.Mobile.iOS
 
         public async void GetIdProject(string name, string guid)
         {
-            var response = await ClientService.GetService("Project/GetIdProject?nameFile=" + name + "&guidElements=" + guid);
-            this.IdProject = Convert.ToInt32(response);
+            try
+            {
+                var response = await ClientService.GetService<int>("Project/GetIdProject?nameFile=" + name + "&guidElements=" + guid);
+                this.IdProject = response;
+            }
+            catch (RequestException ex)
+            {
+                
+            }
+
         }
 
         public async void GetStateProject(string guid)
         {
-            var response = await ClientService.GetService("Project/GetStateProject?id_project=" + IdProject.ToString() + "&guidElements=" + guid);
-            this.State = (SoundState)Convert.ToInt32(response);
+            try
+            {
+                var response = await ClientService.GetService<int>("Project/GetStateProject?id_project=" + IdProject.ToString() + "&guidElements=" + guid);
+                this.State = (SoundState)(response);
+            }
+            catch(RequestException ex)
+            {
+
+            }
+            
         }
 
         public async void GetTranscriptProject(string guid)
         {
-            var response = await ClientService.GetService("Project/GetTranscrib?id_project=" + IdProject.ToString() + "&guidElements=" + guid);
+            var response = await ClientService.GetService<string>("Project/GetTranscrib?id_project=" + IdProject.ToString() + "&guidElements=" + guid);
             this.Transcription = response;
         }
 
