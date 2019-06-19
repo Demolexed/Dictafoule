@@ -30,14 +30,14 @@ namespace Dictafoule.Api.Test
                 Guid = guid
             };
             var response = userController.CreateUser(userModel);
-            Assert.IsInstanceOf<OkResult>(response, "La reponse n'est pas du type OkResult");
+            Assert.IsInstanceOf<OkNegotiatedContentResult>(response, "La reponse n'est pas du type OkResult");
         }
 
         [Test]
         [Description("Ceci test est un pour recuperer l'utilisateur")]
         public void GetUserTestShouldReturnNotFoundResult()
         {
-            var reponse = userController.GetUser("titi");
+            var reponse = userController.GetUser("lulu");
             Assert.IsInstanceOf<NotFoundResult>(reponse);
         }
 
