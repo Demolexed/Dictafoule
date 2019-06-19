@@ -100,8 +100,8 @@ namespace DictaFoule.Mobile.iOS.API
 
         public async static Task<string> StripeCreateToken(StripeTokenModel stripeTokenModel)
         {
-            StripeConfiguration.SetApiKey("pk_live_QH5KMYyGcXiCMnxVCgafCwvl");
-            //StripeConfiguration.SetApiKey("pk_test_AaNnNT0FF5mv410J1FbJjyzf");
+            //StripeConfiguration.SetApiKey("pk_live_QH5KMYyGcXiCMnxVCgafCwvl");
+            StripeConfiguration.SetApiKey("pk_test_AaNnNT0FF5mv410J1FbJjyzf");
             try
             {
                 var tokenOption = new TokenCreateOptions()

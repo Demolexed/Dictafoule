@@ -38,7 +38,7 @@ namespace DictaFoule.Mobile.iOS
             var index = indexPath.Row;
             var detailController = ViewcController.Storyboard.InstantiateViewController("DetailViewController") as DetailViewController;
             ViewcController.NavigationController.PushViewController(detailController, true);
-            detailController.SetItem(tableItems[index]);
+            detailController.SetItem(tableItems[index], this.ViewcController.User);
             tableView.DeselectRow(indexPath, true);
         }
 	}

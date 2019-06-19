@@ -1,8 +1,12 @@
 ﻿using System;
+using System.IO;
+using System.Net.Http;
+using System.Text;
 using System.Threading.Tasks;
 using DictaFoule.Mobile.iOS.API;
 using DictaFoule.Mobile.iOS.Business;
 using Foundation;
+using Newtonsoft.Json;
 
 namespace DictaFoule.Mobile.iOS
 {
@@ -19,6 +23,7 @@ namespace DictaFoule.Mobile.iOS
         public NSUrl Pathfile { get; set; }
         public string Transcription { get; set; }
         private HttpClientService ClientService { get; set; }
+        public string Error { get; set; }
 
         #endregion
 
@@ -57,6 +62,36 @@ namespace DictaFoule.Mobile.iOS
                 this.State = SoundState.New;
             }
             
+        }
+
+        public async Task<bool> SendAudioProject()
+        {
+            string path = Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments);
+            var audio = Path.Combine(path, Name);
+            var toEncodeAsBytes = System.IO.File.ReadAllBytes(Pathfile.Path);
+            var returnValue = Convert.ToBase64String(toEncodeAsBytes);
+
+            var soundFileModel = new SoundFileModel
+            {
+                File64 = returnValue,
+                Name = this.Name,
+                Guid = this.Guid
+            };
+
+            var query = JsonConvert.SerializeObject(soundFileModel);
+
+            try
+            {
+                var response = await ClientService.PostService<int>("Project/Create", new StringContent(query, Encoding.Unicode, "application/json"));
+                this.IdProject = response;
+                this.State = SoundState.Upload;
+                return true;
+            }
+            catch (RequestException ex)
+            {
+                Error = ex.Reason;
+                return false;
+            }
         }
 
         public async void GetTranscriptProject(string guid)

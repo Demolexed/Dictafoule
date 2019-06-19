@@ -9,6 +9,7 @@ using System.Net;
 using System.IO;
 using DictaFoule.Mobile.iOS.API;
 using System.Threading.Tasks;
+using DictaFoule.Mobile.iOS.Business;
 
 namespace DictaFoule.Mobile.iOS
 {
@@ -17,6 +18,7 @@ namespace DictaFoule.Mobile.iOS
 
         public int index;
         public Sound Item { get; set; }
+        public User User { get; set; }
 
         public TimeSpan time = new TimeSpan();
         Timer playTimer = new Timer();
@@ -99,9 +101,10 @@ namespace DictaFoule.Mobile.iOS
                 ErrorTxt.Hidden = false;
         }
 
-        public void SetItem(Sound item)
+        public void SetItem(Sound item, User user)
         {
             Item = item;
+            User = user;
         }
 
         partial void ExportBtn_TouchUpInside(UIButton sender)
@@ -163,7 +166,7 @@ namespace DictaFoule.Mobile.iOS
 
             var payementController = this.Storyboard.InstantiateViewController("PayementController") as PayementController;
             this.NavigationController.PushViewController(payementController, true);
-            payementController.SetItem(Item);
+            payementController.SetItem(Item, User);
         }
 
         void UpdateSliderTime(object sender, ElapsedEventArgs e)

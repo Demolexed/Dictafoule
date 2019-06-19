@@ -3,10 +3,13 @@ using System.Collections.Generic;
 using System.IO;
 using System.Net.Http;
 using System.Text;
+using System.Threading.Tasks;
 using AVFoundation;
 using DictaFoule.Mobile.iOS.API;
+using DictaFoule.Mobile.iOS.Models;
 using Foundation;
 using Newtonsoft.Json;
+using Stripe;
 using UIKit;
 
 namespace DictaFoule.Mobile.iOS.Business
@@ -35,6 +38,8 @@ namespace DictaFoule.Mobile.iOS.Business
             this.clientService = new HttpClientService();
 
             this.GetFiles();
+            GetUser();
+
         }
 
         public User(List<Sound> sounds, string guid)
@@ -46,8 +51,57 @@ namespace DictaFoule.Mobile.iOS.Business
 
         public async void GetUser()
         {
+            try
+            {
+                await clientService.GetService<bool>("User/GetUser?guidElements=" + this.Guid);
+            }
+            catch (RequestException ex)
+            {
+                CreateUser();
+            }
+            
+                
+        }
 
-            var response = await clientService.GetService<string>("User/GetUser?guidElements=" + this.Guid);
+        public async Task<string> CreateToken(StripeTokenModel stripeTokenModel)
+        {
+            StripeConfiguration.ApiKey = "pk_test_AaNnNT0FF5mv410J1FbJjyzf";
+            try
+            {
+                var tokenOption = new TokenCreateOptions()
+                {
+                    Card = new CreditCardOptions()
+                    {
+                        Number = stripeTokenModel.Number,
+                        ExpYear = stripeTokenModel.ExpirationYear,
+                        ExpMonth = stripeTokenModel.ExpirationMonth,
+                        Cvc = stripeTokenModel.Cvc,
+                        Name = stripeTokenModel.Name,
+                    },
+                };
+
+                var tokenService = new TokenService();
+                Token stripeToken = await tokenService.CreateAsync(tokenOption);
+                return stripeToken.Id;
+            }
+            catch (Exception)
+            {
+                throw new RequestException(System.Net.HttpStatusCode.InternalServerError, "stripe erreur", "Erreur lors de la génération du token");
+            }
+        }
+
+        public async Task<bool> Payement(PayementModel payementModel)
+        {
+            try
+            {
+                var query = JsonConvert.SerializeObject(payementModel);
+                await this.clientService.PostService<bool>("Project/Payment", new StringContent(query, Encoding.Unicode, "application/json"));
+                return true;
+            }
+            catch (RequestException ex)
+            {
+                return false;
+            }
         }
 
         public async void CreateUser()

@@ -11,12 +11,14 @@ using Newtonsoft.Json;
 using DictaFoule.Mobile.iOS.API;
 using DictaFoule.Mobile.iOS.Models;
 using System.Threading.Tasks;
+using DictaFoule.Mobile.iOS.Business;
 
 namespace DictaFoule.Mobile.iOS
 {
     public partial class PayementController : UIViewController
     {
         public Sound Item;
+        private User User;
         private double _price;
         private string _token;
 
@@ -24,9 +26,10 @@ namespace DictaFoule.Mobile.iOS
         {
         }
 
-        public void SetItem(Sound item)
+        public void SetItem(Sound item, User user)
         {
             Item = item;
+            User = user;
         }
 
         public override void ViewDidLoad()
@@ -92,10 +95,8 @@ namespace DictaFoule.Mobile.iOS
            WaitPayement.StartAnimating();
 
                
-            if (await ApiCall.GetUserToDataBase() == false)
-                await ApiCall.CreateUserToDataBase();
             await SendAudio();
-            if (Item.IdProject == 0)
+            if (Item.State == Business.SoundState.New)
                 return;
             if (!await CreateToken())
                 return;
@@ -122,33 +123,19 @@ namespace DictaFoule.Mobile.iOS
             var nsUid = UIDevice.CurrentDevice.IdentifierForVendor;
             var guidElements = nsUid.AsString();
 
-            if (Item.IdProject > 0)
+            if (Item.IsWaiting || Item.IsError)
                 return;
 
-            string path = Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments);
-            var audio = Path.Combine(path, Item.Name);
-            var toEncodeAsBytes = System.IO.File.ReadAllBytes(audio);
-            var returnValue = Convert.ToBase64String(toEncodeAsBytes);
-
-            var soundFileModel = new SoundFileModel
+           
+            if (!(await Item.SendAudioProject()))
             {
-                File64 = returnValue,
-                Name = Item.Name,
-                Guid = guidElements
-            };
-
-            var result = await ApiCall.SendAudioToCreateProject(soundFileModel);
-            if (result.Contains("Erreur") )
-            {
-                var erreurAlertController = UIAlertController.Create("Erreur", result, UIAlertControllerStyle.Alert);
+                var erreurAlertController = UIAlertController.Create("Erreur", Item.Error, UIAlertControllerStyle.Alert);
                 erreurAlertController.AddAction(UIAlertAction.Create("OK", UIAlertActionStyle.Default, null));
                 PresentViewController(erreurAlertController, true, null);
                 this.WaitPayement.StopAnimating();
                 EffectViewBlur.Hidden = true;
                 MgsError.Text = "Une erreur est survenue lors de l'envoie.";
             }
-            else
-                Item.IdProject = Int32.Parse(result);
         }
 
         async Task<bool> CreateToken()
@@ -177,16 +164,18 @@ namespace DictaFoule.Mobile.iOS
                 ExpirationMonth = cardexpmonth,
                 Cvc = CVCTxt.Text
             };
-            _token = await ApiCall.StripeCreateToken(stripeTokenModel);
-            if (String.IsNullOrEmpty(_token))
+            try
             {
-                this.WaitPayement.StopAnimating();
-                EffectViewBlur.Hidden = true;
-                MgsError.Text = "Un problème est survenu lors du paiement.";
-                return false;
+                _token = await this.User.CreateToken(stripeTokenModel);
+                return true;
             }
-                
-            return true;
+            catch (RequestException ex)
+            {
+               this.WaitPayement.StopAnimating();
+               EffectViewBlur.Hidden = true;
+               MgsError.Text = "Un problème est survenu lors du paiement.";
+               return false;
+            }
 
         }
 
@@ -200,7 +189,7 @@ namespace DictaFoule.Mobile.iOS
                 Name = Item.Name,
                 Email = EmailTxt.Text,
             };
-            if (!await ApiCall.Payement(payementModel))
+            if (!await this.User.Payement(payementModel))
             {
                 this.WaitPayement.StopAnimating();
                 EffectViewBlur.Hidden = true;

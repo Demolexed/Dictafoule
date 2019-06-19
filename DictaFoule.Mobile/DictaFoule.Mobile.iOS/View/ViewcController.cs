@@ -33,7 +33,7 @@ namespace DictaFoule.Mobile.iOS
 
         UITableView TableRecordView;
 
-        User User { get; set; }
+        public User User { get; private set; }
 
 
             public ViewcController(IntPtr handle) : base(handle)
@@ -236,7 +236,7 @@ namespace DictaFoule.Mobile.iOS
                 Time = time.ToString(@"hh\:mm\:ss"), 
                 Pathfile = pathfile
             };
-            payementController.SetItem(sound);
+            payementController.SetItem(sound, User);
             User.Sounds.Add(sound);
             Add(TableRecordView);
             InvokeOnMainThread(delegate { TableRecordView.ReloadData(); time = TimeSpan.Zero; TimerLbl.Text = time.ToString("t"); });
