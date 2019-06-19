@@ -25,7 +25,7 @@ namespace DictaFoule.API.Controllers
             var user = entities.users.FirstOrDefault(a => a.guid == guidElements);
             if (user == null)
                 return NotFound();
-            return Ok(user);
+            return Ok(true);
         }
 
         /// <summary>

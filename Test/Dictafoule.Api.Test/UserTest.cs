@@ -46,7 +46,7 @@ namespace Dictafoule.Api.Test
         public void GetUserTestShouldReturnFound()
         {
             var reponse = userController.GetUser("1a0c42b8-5465-4dbe-8660-45e22d8d38cd");
-            Assert.IsInstanceOf<OkNegotiatedContentResult<user>>(reponse, "La reponse n'est pas du type OkResult");
+            Assert.IsInstanceOf<OkNegotiatedContentResult<bool>>(reponse, "La reponse n'est pas du type OkResult");
         }
     }
 }
