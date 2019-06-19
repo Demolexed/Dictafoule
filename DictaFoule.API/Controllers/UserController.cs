@@ -25,7 +25,7 @@ namespace DictaFoule.API.Controllers
             var user = entities.users.FirstOrDefault(a => a.guid == guidElements);
             if (user == null)
                 return NotFound();
-            return Ok(user);
+            return Ok(true);
         }
 
         /// <summary>
@@ -47,7 +47,7 @@ namespace DictaFoule.API.Controllers
                 entities.users.Add(user);
                 entities.SaveChanges();
                 LogTools.Add_log(LogLevel.INFO, " API CREATE USER", 0, "new user " + user.id);
-                return Ok();
+                return Ok(true);
             }
             catch (Exception ex)
             {
