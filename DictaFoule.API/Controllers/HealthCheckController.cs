@@ -12,7 +12,6 @@ namespace DictaFoule.API.Controllers
         [Route("v1/HealthCheck/HealthChecking")]
         public IHttpActionResult HealthChecking()
         {
-
             return Ok();
         }
     }
