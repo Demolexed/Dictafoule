@@ -65,7 +65,7 @@ namespace DictaFoule.API.Controllers
                 entities.Entry(Myproject).State = EntityState.Modified;
                 entities.SaveChanges();
 
-                LogTools.Add_log(LogLevel.INFO, " API CREATE PROJECT", Myproject.id, "new project" );
+                LogTools.Add_log(LogLevel.INFO, " API CREATE PROJECT", Myproject.id, "new project");
                 return Ok(Myproject.id);
             }
             catch (Exception ex)
@@ -75,7 +75,7 @@ namespace DictaFoule.API.Controllers
                 return BadRequest(ex.Message);
             }
         }
-        
+
         /// <summary>
         /// Recuperer la transcription du projet
         /// </summary>
@@ -191,7 +191,7 @@ namespace DictaFoule.API.Controllers
             }
             catch (Exception ex)
             {
-                LogTools.Add_log(LogLevel.DANGER, "API SEND EMAIL", emailModel.IdProject, "Fail send email to " + emailModel.Email + " ,error :"+ ex.Message);
+                LogTools.Add_log(LogLevel.DANGER, "API SEND EMAIL", emailModel.IdProject, "Fail send email to " + emailModel.Email + " ,error :" + ex.Message);
                 return InternalServerError(ex);
             }
         }
@@ -235,7 +235,7 @@ namespace DictaFoule.API.Controllers
                     entities.orders.Add(payment);
                     entities.SaveChanges();
                     ProjectTools.UpdateProjectState(paymentModel.IdProject, ProjectState.SoundCut);
-                   AzureQueueStorage.QueueProject(paymentModel.IdProject, "soundcut");
+                    AzureQueueStorage.QueueProject(paymentModel.IdProject, "soundcut");
                 }
 
             }
@@ -249,4 +249,5 @@ namespace DictaFoule.API.Controllers
             LogTools.Add_log(LogLevel.INFO, "API STRIPE PAYMENT", paymentModel.IdProject, "Payment succeeded");
             return Ok(true);
         }
+    }
 }
