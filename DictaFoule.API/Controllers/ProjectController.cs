@@ -99,9 +99,9 @@ namespace DictaFoule.API.Controllers
             StringBuilder result = new StringBuilder();
             foreach (var txt in soundlines)
             {
-                result.Append(soundlines);
+                result.Append(txt.transcript);
             }
-            return Ok(new StringContent(result.ToString(), System.Text.Encoding.UTF8, "text/plain"));
+            return Ok(result.ToString());
         }
 
         /// <summary>
@@ -118,7 +118,7 @@ namespace DictaFoule.API.Controllers
             if (project == null)
                 return BadRequest("User or Project not Found");
             var id_user = entities.users.Find(project.id_user);
-            if (id_user == null && id_user.guid != guidElements)
+            if (id_user == null || id_user.guid != guidElements)
                 return BadRequest("User or Project not Found");
             return Ok(project.state);
         }
