@@ -249,20 +249,4 @@ namespace DictaFoule.API.Controllers
             LogTools.Add_log(LogLevel.INFO, "API STRIPE PAYMENT", paymentModel.IdProject, "Payment succeeded");
             return Ok(true);
         }
-
-        //[HttpPost]
-        //public IHttpActionResult SendInvoice()
-        //{
-        //    StripeConfiguration.SetApiKey(ConfigurationManager.AppSettings["APISTRIPE"]);
-
-        //    var invoiceOptions = new StripeInvoiceCreateOptions()
-        //    {
-        //        Description = "",
-        //        TaxPercent = 20
-        //    };
-
-        //    var invoiceService = new StripeInvoiceService();
-        //    StripeInvoice invoice = invoiceService.Create("cus_DCUTDRmBduxBrG", invoiceOptions);
-        //}
-    }
 }
