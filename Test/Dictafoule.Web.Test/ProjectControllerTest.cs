@@ -44,7 +44,9 @@ namespace Dictafoule.Web.Test
                 State = (ProjectState)p.state
             }).ToList();
 
-            Assert.AreSame(viewModel, listProject.ViewData.Model);
+            var mylist = listProject.Model as List<ListModel>;
+
+            Assert.AreEqual(viewModel.Count, mylist.Count);
         }
 
 
