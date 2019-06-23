@@ -25,9 +25,9 @@
         <tr>
             <td>@Project.IdLog</td>
             @if ((int)Project.LogLevel == 1)
-            {<td><span class="label-info">@Project.LogLevel</span></td>}
+            {<td><span class="badge badge-pill badge-info">@Project.LogLevel</span></td>}
             @if ((int)Project.LogLevel >= 3)
-            {<td><span class="label-danger">@Project.LogLevel</span></td> }
+            {<td><span class="badge badge-pill badge-danger">@Project.LogLevel</span></td> }
             <td>@Project.Type</td>
             <td>@Project.Id_projet</td>
             <td>@Project.Message</td>
