@@ -60,7 +60,6 @@ namespace Dictafoule.Web.Test
 
 
         [Test]
-        [Ignore("Test cassé sur AzureDevops")]
         public void UploadTestNominal()
         {
             var reponse = projectController.Upload(myTestPostedFileBase);
