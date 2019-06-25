@@ -62,7 +62,6 @@ namespace Dictafoule.Web.Test
         [Test]
         public void UploadTestNominal()
         {
-
             var reponse = projectController.Upload(myTestPostedFileBase);
             var result = reponse as JsonResult;
             var absoluteUri = result.Data;
