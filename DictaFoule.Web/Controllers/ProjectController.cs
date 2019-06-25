@@ -40,48 +40,40 @@ namespace DictaFoule.Web.Controllers
         [HttpPost]
         public ActionResult Upload(HttpPostedFileBase ImportFile)
         {
-            try
+            if (ImportFile == null)
+                return new HttpStatusCodeResult(500, "Le fichier est null");
+            if (ImportFile.ContentLength == 0)
+                return new HttpStatusCodeResult(500, "Le fichier est vide");
+            if (!DataValidation.IsMp3(ImportFile.FileName))
+                return new HttpStatusCodeResult(500, "Le fichier n'est pas au bon format");
+
+            var importFile = new project
             {
-                if (ImportFile == null)
-                    return new HttpStatusCodeResult(500, "Le fichier est null");
-                if (ImportFile.ContentLength == 0)
-                    return new HttpStatusCodeResult(500, "Le fichier est vide");
-                if (!DataValidation.IsMp3(ImportFile.FileName))
-                    return new HttpStatusCodeResult(500, "Le fichier n'est pas au bon format");
+                creation_date = DateTime.UtcNow,
+                state = (int)ProjectState.Upload,
+                import_sound_file_name = ImportFile.FileName,
+            };
+            entities.projects.Add(importFile);
+            entities.SaveChanges();
 
-                var importFile = new project
-                {
-                    creation_date = DateTime.UtcNow,
-                    state = (int)ProjectState.Upload,
-                    import_sound_file_name = ImportFile.FileName,
-                };
-                entities.projects.Add(importFile);
-                entities.SaveChanges();
+            var format = string.Empty;
+            if (DataValidation.IsMp3(ImportFile.FileName))
+                format = "mp3";
 
-                var format = string.Empty;
-                if (DataValidation.IsMp3(ImportFile.FileName))
-                    format = "mp3";
+            var fileName = string.Format("project-{0}.{1}", importFile.id, format);
+            var absoluteUri = AzureBlobStorage.Upload(ImportFile, fileName, "import");
 
-                var fileName = string.Format("project-{0}.{1}", importFile.id, format);
-                var absoluteUri = AzureBlobStorage.Upload(ImportFile, fileName, "import");
+            if (string.IsNullOrWhiteSpace(absoluteUri))
+                return new HttpStatusCodeResult(500, "Un problème est survenu pendant l'upload du fichier");
 
-                if (string.IsNullOrWhiteSpace(absoluteUri))
-                    return new HttpStatusCodeResult(500, "Un problème est survenu pendant l'upload du fichier");
+            importFile.import_sound_file_uri = absoluteUri;
+            entities.Entry(importFile).State = EntityState.Modified;
+            entities.SaveChanges();
 
-                importFile.import_sound_file_uri = absoluteUri;
-                entities.Entry(importFile).State = EntityState.Modified;
-                entities.SaveChanges();
+            ProjectTools.UpdateProjectState(importFile.id, ProjectState.SoundCut);
+            AzureQueueStorage.QueueProject(importFile.id, "soundcut");
 
-                ProjectTools.UpdateProjectState(importFile.id, ProjectState.SoundCut);
-                AzureQueueStorage.QueueProject(importFile.id, "soundcut");
-
-                return Json(new { AbsoluteUri = absoluteUri });
-            }
-            catch (Exception ex)
-            {
-                Console.WriteLine(ex.Message);
-                throw ex;
-            }
+            return Json(new { AbsoluteUri = absoluteUri });
         }
 
         [AllowAnonymous]
