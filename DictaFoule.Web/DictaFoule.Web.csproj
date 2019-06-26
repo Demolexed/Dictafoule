@@ -201,6 +201,7 @@
     <Content Include="scripts\esm\popper.js.map" />
     <Content Include="scripts\esm\popper-utils.min.js.map" />
     <Content Include="scripts\esm\popper-utils.js.map" />
+    <None Include="Properties\PublishProfiles\admin-dictafoule - Web Deploy.pubxml" />
     <None Include="Properties\PublishProfiles\dev-omink-dictafoule - Web Deploy.pubxml" />
     <None Include="scripts\jquery-1.10.2.intellisense.js" />
     <Content Include="scripts\jasny-bootstrap.js" />
