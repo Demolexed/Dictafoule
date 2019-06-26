@@ -58,19 +58,6 @@ namespace Dictafoule.Web.Test
             Assert.AreEqual(viewModel.Count, mylist.Count);
         }
 
-
-        [Test]
-        public void UploadTestNominal()
-        {
-            var reponse = projectController.Upload(myTestPostedFileBase);
-            var result = reponse as JsonResult;
-            var absoluteUri = result.Data;
-
-            var uri = entities.projects.ToList().LastOrDefault();
-
-            Assert.AreEqual(new { AbsoluteUri = uri.import_sound_file_uri }.ToString(), absoluteUri.ToString());
-        }
-
         [Test]
         public void UploadTestFailFileNull()
         {
