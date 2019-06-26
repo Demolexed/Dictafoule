@@ -100,6 +100,9 @@
     <BuildIpa>true</BuildIpa>
   </PropertyGroup>
   <ItemGroup>
+    <Reference Include="Stripe.net, Version=26.0.0.0, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>..\..\packages\Stripe.net.26.0.0\lib\netstandard2.0\Stripe.net.dll</HintPath>
+    </Reference>
     <Reference Include="System" />
     <Reference Include="System.Xml" />
     <Reference Include="System.Core" />
@@ -123,9 +126,6 @@
     </Reference>
     <Reference Include="Newtonsoft.Json">
       <HintPath>..\..\packages\Newtonsoft.Json.12.0.2\lib\netstandard2.0\Newtonsoft.Json.dll</HintPath>
-    </Reference>
-    <Reference Include="Stripe.net">
-      <HintPath>..\..\packages\Stripe.net.27.1.3\lib\netstandard2.0\Stripe.net.dll</HintPath>
     </Reference>
   </ItemGroup>
   <ItemGroup>
@@ -193,6 +193,7 @@
     <InterfaceDefinition Include="Main.storyboard" />
   </ItemGroup>
   <ItemGroup>
+    <None Include="app.config" />
     <None Include="Info.plist" />
     <None Include="Entitlements.plist" />
     <None Include="packages.config" />
@@ -266,16 +267,10 @@
   <ItemGroup>
     <Folder Include="Resources\Images.xcassets\DetailsIcon.imageset\" />
     <Folder Include="Resources\Images.xcassets\EndRecord.imageset\" />
-    <Folder Include="Resources\Images.xcassets\PlayIcon.imageset\" />
-    <Folder Include="Resources\Images.xcassets\SaveButton.imageset\" />
-    <Folder Include="Models\" />
-    <Folder Include="View\" />
-    <Folder Include="API\" />
-    <Folder Include="PopUp\" />
-    <Folder Include="Resources\Images.xcassets\PlayIconDisable.imageset\" />
     <Folder Include="Resources\Images.xcassets\PauseIcon.imageset\" />
-    <Folder Include="Business\" />
-    <Folder Include="Helper\" />
+    <Folder Include="Resources\Images.xcassets\PlayIcon.imageset\" />
+    <Folder Include="Resources\Images.xcassets\PlayIconDisable.imageset\" />
+    <Folder Include="Resources\Images.xcassets\SaveButton.imageset\" />
   </ItemGroup>
   <Import Project="$(MSBuildExtensionsPath)\Xamarin\iOS\Xamarin.iOS.CSharp.targets" />
   <Import Project="..\packages\Xamarin.Android.Support.v7.AppCompat.25.4.0.2\build\MonoAndroid70\Xamarin.Android.Support.v7.AppCompat.targets" Condition="Exists('..\packages\Xamarin.Android.Support.v7.AppCompat.25.4.0.2\build\MonoAndroid70\Xamarin.Android.Support.v7.AppCompat.targets')" />
