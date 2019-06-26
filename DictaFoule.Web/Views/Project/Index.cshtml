@@ -30,7 +30,7 @@
             <td>
                 @if (Project.State == DictaFoule.Common.Enum.ProjectState.ProjectCompleted)
                 {
-                    <a href="@Url.Action("Download","Project", new { id = Project.IdProject})"><span class="icon-action glyphicon glyphicon-log-out" data-toggle="tooltip" data-placement="top" title="Download"></span></a>
+                    <a href="@Url.Action("Download","Project", new { id = Project.IdProject})"><span class="fa fa-file-archive-o" data-toggle="tooltip" data-placement="top" title="Download"></span></a>
                 }
             </td>
     </tr>

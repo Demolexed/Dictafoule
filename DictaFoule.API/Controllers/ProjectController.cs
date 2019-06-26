@@ -16,52 +16,57 @@ using System.Configuration;
 using Stripe;
 using Newtonsoft.Json;
 using Xceed.Words.NET;
+using System.Text;
 
 namespace DictaFoule.API.Controllers
 {
     public class ProjectController : BaseController
     {
+        /// <summary>
+        /// Create d'un nouveau projet Dictafoule
+        /// </summary>
+        /// <param name="importFile"></param>
+        /// <returns></returns>
         [HttpPost]
         [Route("v1/Project/Create")]
-        public IHttpActionResult Create(Object model)
+        public IHttpActionResult Create(SoundFileModel importFile)
         {
-            var jsonmodel = model.ToString();
-            var ImportFile = JsonConvert.DeserializeObject<SoundFileModel>(jsonmodel);
-            var user = entities.users.Where(a => a.guid == ImportFile.Guid).ToList();
+            var user = entities.users.Where(a => a.guid == importFile.Guid).ToList();
             if (user.Count == 0)
                 return BadRequest("User not found");
             try
             {
-                var file = DecodeEncodeTo64.DecodeFrom64(ImportFile.File64);
+                var file = DecodeEncodeTo64.DecodeFrom64(importFile.File64);
                 file.Position = 0;
                 if (file == null)
                     return BadRequest("Le fichier est null");
                 if (file.Length == 0)
                     return BadRequest("Le fichier est vide");
-                if (!DataValidation.IsMp3(ImportFile.Name) && !DataValidation.IsWav(ImportFile.Name))
+                if (!DataValidation.IsMp3(importFile.Name) && !DataValidation.IsWav(importFile.Name))
                     return BadRequest("Le fichier n'est pas au bon format");
-                var importFile = new project
+
+                var Myproject = new project
                 {
                     creation_date = DateTime.UtcNow,
                     state = 0,
-                    import_sound_file_name = ImportFile.Name,
+                    import_sound_file_name = importFile.Name,
                     id_user = user.FirstOrDefault().id
                 };
-                entities.projects.Add(importFile);
+                entities.projects.Add(Myproject);
                 entities.SaveChanges();
 
 
-                var absoluteUri = AzureBlobStorage.Upload(file, "audio/mpeg", ImportFile.Name, "import");
+                var absoluteUri = AzureBlobStorage.Upload(file, "audio/mpeg", importFile.Name, "import");
 
                 if (string.IsNullOrWhiteSpace(absoluteUri))
                     return BadRequest("Un problème est survenu pendant l'upload du fichier");
 
-                importFile.import_sound_file_uri = absoluteUri;
-                entities.Entry(importFile).State = EntityState.Modified;
+                Myproject.import_sound_file_uri = absoluteUri;
+                entities.Entry(Myproject).State = EntityState.Modified;
                 entities.SaveChanges();
 
-                LogTools.Add_log(LogLevel.INFO, " API CREATE PROJECT", importFile.id, "new project" );
-                return Ok(importFile.id);
+                LogTools.Add_log(LogLevel.INFO, " API CREATE PROJECT", Myproject.id, "new project");
+                return Ok(Myproject.id);
             }
             catch (Exception ex)
             {
@@ -71,28 +76,40 @@ namespace DictaFoule.API.Controllers
             }
         }
 
+        /// <summary>
+        /// Recuperer la transcription du projet
+        /// </summary>
+        /// <param name="id_project"></param>
+        /// <param name="guidElements"></param>
+        /// <returns></returns>
         [HttpGet]
         [Route("v1/Project/GetTranscrib")]
-        public HttpResponseMessage GetTransbrib(int id_project, string guidElements)
+        public IHttpActionResult GetTransbrib(int id_project, string guidElements)
         {
             var project = entities.projects.Find(id_project);
             if (project == null)
-                return new HttpResponseMessage(HttpStatusCode.NotFound);
+                return NotFound();
             var id_user = entities.users.Find(project.id_user);
             if (id_user.guid != guidElements)
-                return new HttpResponseMessage(HttpStatusCode.NotFound);
-            var response = new HttpResponseMessage(HttpStatusCode.OK);
+                return NotFound();
             var soundlines = entities.sound_line.Where(sl => sl.id_project == id_project).ToList();
             if (soundlines.Count == 0)
-                return new HttpResponseMessage(HttpStatusCode.NotFound);
-            string result = String.Empty;
+                return NotFound();
+
+            StringBuilder result = new StringBuilder();
             foreach (var txt in soundlines)
             {
-                result += txt.task_answer;
+                result.Append(txt.transcript);
             }
-            response.Content = new StringContent(result, System.Text.Encoding.UTF8, "text/plain");
-            return response;
+            return Ok(result.ToString());
         }
+
+        /// <summary>
+        /// Recuperer l'etat du projet
+        /// </summary>
+        /// <param name="id_project"></param>
+        /// <param name="guidElements"></param>
+        /// <returns></returns>
         [HttpGet]
         [Route("v1/Project/GetStateProject")]
         public IHttpActionResult GetStateProject(int id_project, string guidElements)
@@ -101,20 +118,17 @@ namespace DictaFoule.API.Controllers
             if (project == null)
                 return BadRequest("User or Project not Found");
             var id_user = entities.users.Find(project.id_user);
-            if (id_user == null && id_user.guid != guidElements)
+            if (id_user == null || id_user.guid != guidElements)
                 return BadRequest("User or Project not Found");
             return Ok(project.state);
         }
 
-        [HttpGet]
-        [Route("v1/Project/GetUser")]
-        public IHttpActionResult GetUser(string guidElements)
-        {
-            var user = entities.users.Where(a => a.guid == guidElements).ToList();
-            if (user.Count == 0)
-                return InternalServerError();
-            return Ok();
-        }
+        /// <summary>
+        /// Recuperer l'id du projet
+        /// </summary>
+        /// <param name="nameFile"></param>
+        /// <param name="guidElements"></param>
+        /// <returns></returns>
         [HttpGet]
         [Route("v1/Project/GetIdProject")]
         public IHttpActionResult GetIdProject(string nameFile, string guidElements)
@@ -130,36 +144,15 @@ namespace DictaFoule.API.Controllers
                 return Ok(project.FirstOrDefault().id);
         }
 
-        [HttpPost]
-        [Route("v1/Project/CreateUser")]
-        public IHttpActionResult CreateUser(Object model)
-        {
-            var jsonmodel = model.ToString();
-            var usermodel = JsonConvert.DeserializeObject<UserModel>(jsonmodel);
-            try
-            {
-                var user = new user
-                {
-                    guid = usermodel.Guid,
-                    right = (int)RightAcces.User
-                };
-                entities.users.Add(user);
-                entities.SaveChanges();
-                LogTools.Add_log(LogLevel.INFO, " API CREATE USER", 0, "new user " + user.id);
-                return Ok();
-            }
-            catch (Exception ex)
-            {
-                LogTools.Add_log(LogLevel.DANGER, " API CREATE USER", 0, "Fail create user " + ex.Message);
-                return InternalServerError(ex);
-            }
-        }
+        /// <summary>
+        /// Envoyer un mail à l'utilisateur avec la transcription
+        /// </summary>
+        /// <param name="emailModel"></param>
+        /// <returns></returns>
         [HttpPost]
         [Route("v1/Project/SendEmail")]
-        public async System.Threading.Tasks.Task<IHttpActionResult> SendEmail(Object model)
+        public async System.Threading.Tasks.Task<IHttpActionResult> SendEmail(SendEmailModel emailModel)
         {
-            var jsonmodel = model.ToString();
-            var emailModel = JsonConvert.DeserializeObject<SendEmailModel>(jsonmodel);
             var user = entities.users.Where(u => u.guid == emailModel.GuidElements).ToList();
             if (user.Count == 0)
                 return NotFound();
@@ -198,11 +191,16 @@ namespace DictaFoule.API.Controllers
             }
             catch (Exception ex)
             {
-                LogTools.Add_log(LogLevel.DANGER, "API SEND EMAIL", emailModel.IdProject, "Fail send email to " + emailModel.Email + " ,error :"+ ex.Message);
+                LogTools.Add_log(LogLevel.DANGER, "API SEND EMAIL", emailModel.IdProject, "Fail send email to " + emailModel.Email + " ,error :" + ex.Message);
                 return InternalServerError(ex);
             }
         }
 
+        /// <summary>
+        /// Payer pour la transcription
+        /// </summary>
+        /// <param name="paymentModel"></param>
+        /// <returns></returns>
         [HttpPost]
         [Route("v1/Project/Payment")]
         public IHttpActionResult Payement(PaymentModel paymentModel)
@@ -237,7 +235,7 @@ namespace DictaFoule.API.Controllers
                     entities.orders.Add(payment);
                     entities.SaveChanges();
                     ProjectTools.UpdateProjectState(paymentModel.IdProject, ProjectState.SoundCut);
-                   AzureQueueStorage.QueueProject(paymentModel.IdProject, "soundcut");
+                    AzureQueueStorage.QueueProject(paymentModel.IdProject, "soundcut");
                 }
 
             }
@@ -251,20 +249,5 @@ namespace DictaFoule.API.Controllers
             LogTools.Add_log(LogLevel.INFO, "API STRIPE PAYMENT", paymentModel.IdProject, "Payment succeeded");
             return Ok(true);
         }
-
-        //[HttpPost]
-        //public IHttpActionResult SendInvoice()
-        //{
-        //    StripeConfiguration.SetApiKey(ConfigurationManager.AppSettings["APISTRIPE"]);
-
-        //    var invoiceOptions = new StripeInvoiceCreateOptions()
-        //    {
-        //        Description = "",
-        //        TaxPercent = 20
-        //    };
-
-        //    var invoiceService = new StripeInvoiceService();
-        //    StripeInvoice invoice = invoiceService.Create("cus_DCUTDRmBduxBrG", invoiceOptions);
-        //}
     }
 }
